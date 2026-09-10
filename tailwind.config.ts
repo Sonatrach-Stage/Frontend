@@ -2,7 +2,13 @@ import type { Config } from 'tailwindcss'
 import tailwindcssAnimate from 'tailwindcss-animate'
 
 export default {
-  content: ['./index.html', './**/*.{ts,tsx}'],
+  content: [
+  './index.html',
+  './*.{js,ts,jsx,tsx}',
+  './pages/**/*.{js,ts,jsx,tsx}',
+  './lib/**/*.{js,ts,jsx,tsx}',
+  './types/**/*.{js,ts,jsx,tsx}',
+],
   darkMode: 'class',
   theme: {
     extend: {

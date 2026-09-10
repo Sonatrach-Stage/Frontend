@@ -214,23 +214,7 @@ export default function SignupInformationPage({
 
   return newErrors
 }
-function handleSubmit() {
-  const validationErrors = isSupervisor
-    ? validateSupervisor()
-    : validateIntern()
 
-  setErrors(validationErrors)
-
-  if (Object.keys(validationErrors).length > 0) {
-    return
-  }
-
-  if (isSupervisor) {
-    navigate('/signup/request')
-  } else {
-    navigate('/signup/company')
-  }
-}
   function submitForm(event: FormEvent<HTMLFormElement>) {
   event.preventDefault()
 
@@ -244,7 +228,7 @@ function handleSubmit() {
     return
   }
 
-  navigate('/signup/company')
+  navigate(isSupervisor ? '/signup/request' : '/signup/company')
 }
   function clearError(field: string) {
     if (errors[field]) {

@@ -1,0 +1,85 @@
+import {
+  Bell,
+  Bot,
+  Briefcase,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
+  CheckSquare,
+  ClipboardList,
+  FileText,
+  FolderOpen,
+  Grid2X2,
+  GraduationCap,
+  LayoutDashboard,
+  Layers,
+  MessageSquare,
+  User,
+  UserCog,
+  Users,
+} from 'lucide-react'
+
+import type { NavItem } from './DashboardLayout'
+
+export const companyAdminNav: NavItem[] = [
+  { label: 'Accueil', icon: Grid2X2, path: '' },
+  { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
+  { label: 'Demandes de stage', icon: ClipboardList, path: 'demandes' },
+  { label: 'Mes stagiaires', icon: Users, path: 'stagiaires' },
+  { label: 'Encadrants', icon: Briefcase, path: 'encadrants' },
+  { label: 'Affectations', icon: Layers, path: 'affectations' },
+  { label: 'Offres de stage', icon: Briefcase, path: 'offres' },
+  { label: 'Activités', icon: CalendarDays, path: 'activites' },
+  { label: 'Tâches', icon: CheckSquare, path: 'taches' },
+  { label: 'Calendrier', icon: CalendarDays, path: 'calendrier' },
+  { label: 'Documents', icon: FolderOpen, path: 'documents' },
+  { label: 'Rapports', icon: FileText, path: 'rapports' },
+  { label: 'Notifications', icon: Bell, path: 'notifications' },
+  { label: 'Profil', icon: User, path: 'profil' },
+]
+
+export const internNav: NavItem[] = [
+  { label: 'Accueil', icon: Grid2X2, path: '' },
+  { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
+  { label: 'Mon stage', icon: BriefcaseBusiness, path: 'mon-stage' },
+  { label: 'Mon encadrant', icon: UserCog, path: 'mon-encadrant' },
+  { label: 'Mes activités', icon: CalendarDays, path: 'activites' },
+  { label: 'Mes tâches', icon: CheckSquare, path: 'taches' },
+  { label: 'Calendrier', icon: CalendarDays, path: 'calendrier' },
+  { label: 'Messages', icon: MessageSquare, path: 'messages' },
+  { label: 'Mon rapport / mémoire', icon: FileText, path: 'rapport' },
+  { label: 'Mes documents', icon: FolderOpen, path: 'documents' },
+  { label: 'Assistant IA', icon: Bot, path: 'ia' },
+  { label: 'Notifications', icon: Bell, path: 'notifications' },
+  { label: 'Profil', icon: User, path: 'profil' },
+]
+
+export const supervisorNav: NavItem[] = [
+  { label: 'Accueil', icon: Grid2X2, path: '' },
+  { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
+  { label: 'Mes stagiaires', icon: Users, path: 'stagiaires' },
+  { label: 'Affectations', icon: Layers, path: 'affectations' },
+  { label: 'Activités', icon: CalendarDays, path: 'activites' },
+  { label: 'Tâches', icon: CheckSquare, path: 'taches' },
+  { label: 'Calendrier', icon: CalendarDays, path: 'calendrier' },
+  { label: 'Messages', icon: MessageSquare, path: 'messages' },
+  { label: 'Rapports et mémoires', icon: FileText, path: 'rapports' },
+  { label: 'Documents', icon: FolderOpen, path: 'documents' },
+  { label: 'Assistant IA', icon: Bot, path: 'ia' },
+  { label: 'Notifications', icon: Bell, path: 'notifications' },
+  { label: 'Profil', icon: User, path: 'profil' },
+]
+
+export const superAdminNav: NavItem[] = [
+  { label: 'Accueil', icon: Grid2X2, path: '' },
+  { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
+  { label: 'Utilisateurs', icon: Users, path: 'utilisateurs' },
+  { label: 'Entreprises', icon: Building2, path: 'entreprises' },
+  { label: 'Stagiaires', icon: GraduationCap, path: 'stagiaires' },
+  { label: 'Encadrants', icon: UserCog, path: 'encadrants' },
+  { label: 'Demandes', icon: ClipboardList, path: 'demandes' },
+  { label: 'Documents', icon: FolderOpen, path: 'documents' },
+  { label: 'Rapports', icon: FileText, path: 'rapports' },
+  { label: 'Notifications', icon: Bell, path: 'notifications' },
+  { label: 'Profil', icon: User, path: 'profil' },
+]

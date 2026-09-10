@@ -19,6 +19,7 @@ import { Input } from '../lib/shadcn/input'
 import { cn } from '../lib/shadcn/utils'
 import { BrandLogo } from './ui/BrandLogo'
 import type { Role } from './data/internPilotData'
+import { saveCurrentUser } from '../lib/auth'
 
 const loginRoles: Array<{
   id: Role
@@ -67,18 +68,43 @@ const highlights = [
   },
 ]
 
+// Démo : profil renvoyé selon le rôle choisi sur l'écran de connexion.
+// À remplacer par la réponse réelle de l'API une fois le backend branché.
+const demoProfiles: Record<Role, { name: string; companyName?: string; avatarInitials: string }> = {
+  'super-admin': { name: 'Admin Système', avatarInitials: 'AS' },
+  'company-admin': { name: 'Ahmed Benali', companyName: 'ABC', avatarInitials: 'AB' },
+  supervisor: { name: 'Karim Bennani', companyName: 'Atlas Telecom', avatarInitials: 'KB' },
+  intern: { name: 'Sara Amrani', companyName: 'Atlas Telecom', avatarInitials: 'SA' },
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const [selectedRole, setSelectedRole] = useState<Role>('supervisor')
+  const [email, setEmail] = useState('demo@internpilot.app')
+
+  function handleSubmit() {
+    const profile = demoProfiles[selectedRole]
+
+    saveCurrentUser({
+      id: 1,
+      name: profile.name,
+      email,
+      role: selectedRole,
+      companyName: profile.companyName,
+      status: 'accepted',
+      avatarInitials: profile.avatarInitials,
+    })
+
+    navigate('/dashboard')
+  }
 
   return (
     <main className="min-h-screen bg-card text-foreground">
       <div className="grid min-h-screen lg:grid-cols-[52%_48%]">
         <section
-  className="relative flex min-h-[460px] flex-col justify-between overflow-hidden bg-cover bg-center bg-no-repeat px-8 py-8 text-white sm:px-14 lg:min-h-screen"
-  style={{ backgroundImage: "url('/assets/hero-team.jpg')" }}
->
-
+          className="relative flex min-h-[460px] flex-col justify-between overflow-hidden bg-cover bg-center bg-no-repeat px-8 py-8 text-white sm:px-14 lg:min-h-screen"
+          style={{ backgroundImage: "url('/assets/hero-team.jpg')" }}
+        >
           <div className="absolute inset-0 bg-[rgba(8,35,68,0.72)]" />
           <div className="relative z-10">
             <BrandLogo inverse />
@@ -148,7 +174,7 @@ export default function LoginPage() {
               className="mt-8 space-y-5"
               onSubmit={(event) => {
                 event.preventDefault()
-                navigate('/dashboard')
+                handleSubmit()
               }}
             >
               <div>
@@ -160,7 +186,8 @@ export default function LoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue="demo@internpilot.app"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
                     className="h-12 rounded-2xl pl-11 text-[15px] shadow-sm"
                   />
                 </div>
