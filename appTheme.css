@@ -1,0 +1,42 @@
+:root:root {
+  --intern-navy: 0 62 90;
+  --intern-navy-deep: 0 47 70;
+  --intern-blue: 0 130 196;
+  --intern-soft-blue: 232 245 250;
+  --intern-page: 248 251 253;
+  --intern-line: 220 230 236;
+}
+
+:root.dark {
+  --intern-navy: 8 42 60;
+  --intern-navy-deep: 5 31 45;
+  --intern-blue: 73 168 220;
+  --intern-soft-blue: 13 38 52;
+  --intern-page: 8 15 22;
+  --intern-line: 42 67 82;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.login-hero-background {
+  background-image:
+    linear-gradient(180deg, rgba(var(--intern-navy-deep), 0.94), rgba(var(--intern-navy), 0.9)),
+    url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=85");
+  background-size: cover;
+  background-position: center;
+}
+
+.soft-grid-background {
+  background-image:
+    radial-gradient(circle at 10% 5%, rgba(var(--intern-blue), 0.08), transparent 24rem),
+    radial-gradient(circle at 90% 15%, rgba(var(--intern-blue), 0.06), transparent 18rem),
+    linear-gradient(180deg, rgb(var(--intern-page)), rgb(var(--intern-page)));
+}
