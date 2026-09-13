@@ -13,6 +13,9 @@ import {
 import './appTheme.css'
 
 import LoginPage from './pages/LoginPage'
+import SupervisorInternsPage from './pages/dashboard/supervisor/InternsPage'
+import SupervisorAssignmentsPage from './pages/dashboard/supervisor/AssignmentsPage'
+import SupervisorCalendarPage from './pages/dashboard/supervisor/CalendarPage'
 import SignupRolePage from './pages/SignupRolePage'
 import SignupInformationPage from './pages/SignupInformationPage'
 import SignupCompanyPage from './pages/SignupCompanyPage'
@@ -179,11 +182,13 @@ export default function App() {
       >
         <Route index element={<SupervisorHome />} />
         <Route path="tableau-de-bord" element={<SupervisorDashboardTab />} />
-        <Route path="stagiaires" element={<PlaceholderPage icon={Layers} title="Mes stagiaires" description="Stagiaires affectés par l'administrateur." />} />
-        <Route path="affectations" element={<PlaceholderPage icon={Layers} title="Affectations" description="Vos affectations en cours." />} />
+        <Route path="stagiaires" element={<SupervisorInternsPage />} />
+<Route path="affectations" element={<SupervisorAssignmentsPage />} />
+<Route path="calendrier" element={<SupervisorCalendarPage />} />
+        
         <Route path="activites" element={<SupervisorActivitiesPage />} />
         <Route path="taches" element={<SupervisorTasksPage />} />
-        <Route path="calendrier" element={<PlaceholderPage icon={CalendarDays} title="Calendrier" description="Réunions et rendez-vous." />} />
+        
         <Route path="messages" element={<SupervisorMessagesPage />} />
         <Route path="rapports" element={<ReportsAndThesesPage />} />
         <Route path="documents" element={<SupervisorDocumentsPage />} />

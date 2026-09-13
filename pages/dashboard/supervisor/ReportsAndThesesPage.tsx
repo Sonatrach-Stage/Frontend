@@ -17,26 +17,20 @@ const statusColors: Record<Thesis['status'], string> = {
 export default function ReportsAndThesesPage() {
   const [theses, setTheses] = useState<Thesis[]>(initialTheses)
   const [kindTab, setKindTab] = useState<'Rapport' | 'Mémoire'>('Rapport')
-  const [typeTab, setTypeTab] = useState<'PFE' | 'PFC'>('PFE')
   const [showAllCompanies, setShowAllCompanies] = useState(false)
 
   const filtered = theses.filter((t) => {
     const matchesKind = t.kind === kindTab
-    const matchesType = t.type === typeTab
-    const matchesCompany = showAllCompanies || t.company === 'Atlas Telecom' // entreprise de l'encadrant connecté (mock)
-    return matchesKind && matchesType && matchesCompany
+    const matchesCompany = showAllCompanies || t.company === 'Atlas Telecom'
+    return matchesKind && matchesCompany
   })
 
   function validate(id: number) {
-    setTheses((current) =>
-      current.map((t) => (t.id === id ? { ...t, status: 'Validé', published: true } : t)),
-    )
+    setTheses((current) => current.map((t) => (t.id === id ? { ...t, status: 'Validé', published: true } : t)))
   }
 
   function requestCorrection(id: number) {
-    setTheses((current) =>
-      current.map((t) => (t.id === id ? { ...t, status: 'À corriger' } : t)),
-    )
+    setTheses((current) => current.map((t) => (t.id === id ? { ...t, status: 'À corriger' } : t)))
   }
 
   return (
@@ -45,20 +39,15 @@ export default function ReportsAndThesesPage() {
         <div>
           <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Rapports et mémoires</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Un mémoire validé devient visible par tous les utilisateurs de la plateforme.
+            Les rapports correspondent aux PFC, les mémoires aux PFE. Un document validé devient visible par tous.
           </p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          className="rounded-xl"
-          onClick={() => setShowAllCompanies((v) => !v)}
-        >
-          {showAllCompanies ? 'Revenir à mon entreprise' : "Voir autres rapports / mémoires (autres stagiaires)"}
+        <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowAllCompanies((v) => !v)}>
+          {showAllCompanies ? 'Revenir à mon entreprise' : "Voir autre rapport ou mémoire"}
         </Button>
       </div>
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-5 flex gap-2">
         {(['Rapport', 'Mémoire'] as const).map((k) => (
           <button
             key={k}
@@ -69,30 +58,14 @@ export default function ReportsAndThesesPage() {
               kindTab === k ? 'border-[rgb(var(--intern-blue))] bg-[rgb(var(--intern-soft-blue))]' : 'hover:bg-muted',
             )}
           >
-            {k === 'Rapport' ? 'Rapports' : 'Mémoires'}
-          </button>
-        ))}
-      </div>
-
-      <div className="mb-5 flex gap-2">
-        {(['PFE', 'PFC'] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTypeTab(t)}
-            className={cn(
-              'rounded-lg border px-3.5 py-1.5 text-xs font-bold transition-colors',
-              typeTab === t ? 'border-[rgb(var(--intern-navy))] bg-[rgb(var(--intern-navy))] text-white' : 'hover:bg-muted',
-            )}
-          >
-            Package {t}
+            {k === 'Rapport' ? 'Rapports (PFC)' : 'Mémoires (PFE)'}
           </button>
         ))}
       </div>
 
       {showAllCompanies && (
         <p className="mb-4 text-xs font-semibold text-[rgb(var(--intern-blue))]">
-          Vue élargie : tous les {kindTab === 'Rapport' ? 'rapports' : 'mémoires'} {typeTab} de toutes les entreprises.
+          Vue élargie : tous les {kindTab === 'Rapport' ? 'rapports' : 'mémoires'} de toutes les entreprises.
         </p>
       )}
 
@@ -115,7 +88,7 @@ export default function ReportsAndThesesPage() {
                 <Badge variant="outline" className={cn('rounded-full', statusColors[thesis.status])}>
                   {thesis.status}
                 </Badge>
-                <Button size="sm" variant="outline" className="rounded-lg"><Eye className="h-3.5 w-3.5" /> Consulter</Button>
+                <Button size="sm" variant="outline" className="rounded-lg"><Eye className="h-3.5 w-3.5" /> Voir</Button>
                 <Button size="sm" variant="outline" className="rounded-lg"><Download className="h-3.5 w-3.5" /> Télécharger</Button>
                 {!showAllCompanies && thesis.status !== 'Validé' && (
                   <>

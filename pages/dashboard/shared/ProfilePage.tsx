@@ -8,6 +8,8 @@ type ExtraField = { label: string; defaultValue?: string }
 
 export function ProfilePage({ roleLabel, extraFields = [] }: { roleLabel: string; extraFields?: ExtraField[] }) {
   const user = getCurrentUser()
+  const [firstName, ...rest] = (user?.name ?? '').split(' ')
+  const lastName = rest.join(' ')
 
   return (
     <>
@@ -37,8 +39,12 @@ export function ProfilePage({ roleLabel, extraFields = [] }: { roleLabel: string
         <p className="mt-8 text-xs font-bold uppercase tracking-wide text-muted-foreground">Informations personnelles</p>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Nom complet</label>
-            <Input defaultValue={user?.name} className="h-10 rounded-xl" />
+            <label className="mb-2 block text-sm font-semibold text-foreground">Prénom</label>
+            <Input defaultValue={firstName} className="h-10 rounded-xl" />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-foreground">Nom</label>
+            <Input defaultValue={lastName} className="h-10 rounded-xl" />
           </div>
           <div>
             <label className="mb-2 block text-sm font-semibold text-foreground">E-mail</label>
@@ -70,7 +76,7 @@ export function ProfilePage({ roleLabel, extraFields = [] }: { roleLabel: string
           </>
         )}
 
-        <p className="mt-7 text-xs font-bold uppercase tracking-wide text-muted-foreground">Sécurité</p>
+        <p className="mt-7 text-xs font-bold uppercase tracking-wide text-muted-foreground">Changer le mot de passe</p>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-semibold text-foreground">Nouveau mot de passe</label>

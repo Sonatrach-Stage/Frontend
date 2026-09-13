@@ -166,24 +166,166 @@ export const supervisorDocuments: SupervisorDocument[] = [
 ]
 
 // --- Rapports et mémoires : PFE / PFC, publication globale ---
-export type ThesisStatus = 'Brouillon' | 'Soumis' | 'En cours de révision' | 'À corriger' | 'Validé'
+
+
+export type ThesisStatus =
+  | 'Brouillon'
+  | 'Soumis'
+  | 'En cours de révision'
+  | 'À corriger'
+  | 'Validé'
 
 export type Thesis = {
   id: number
+  title: string
   intern: string
   company: string
-  type: 'PFE' | 'PFC'
   kind: 'Rapport' | 'Mémoire'
-  title: string
-  version: string
+  version: number
   date: string
   status: ThesisStatus
   published: boolean
 }
 
 export const theses: Thesis[] = [
-  { id: 1, intern: 'Ahmed Ben Ali', company: 'Atlas Telecom', type: 'PFE', kind: 'Rapport', title: 'Application RH — Rapport intermédiaire', version: 'V2', date: '12/09', status: 'À corriger', published: false },
-  { id: 2, intern: 'Sara Amrane', company: 'Atlas Telecom', type: 'PFC', kind: 'Mémoire', title: 'Gestion des stages', version: 'V1', date: '13/09', status: 'Validé', published: true },
-  { id: 3, intern: 'Lina Berrada', company: 'Novabank', type: 'PFE', kind: 'Mémoire', title: 'Fintech mobile', version: 'V1', date: '10/09', status: 'Soumis', published: false },
-  { id: 4, intern: 'Youssef Amine', company: 'Sigma Energy', type: 'PFC', kind: 'Rapport', title: 'Audit cybersécurité', version: 'V1', date: '09/09', status: 'Validé', published: true },
+  {
+    id: 1,
+    title: 'Application de gestion des stages',
+    intern: 'Zineb Ouled Laid',
+    company: 'Atlas Telecom',
+    kind: 'Rapport',
+    version: 1,
+    date: '10/09/2026',
+    status: 'Soumis',
+    published: false,
+  },
+  {
+    id: 2,
+    title: 'Plateforme intelligente de gestion des stages',
+    intern: 'Ahmed Benali',
+    company: 'Atlas Telecom',
+    kind: 'Mémoire',
+    version: 2,
+    date: '08/09/2026',
+    status: 'En cours de révision',
+    published: false,
+  },
+  {
+    id: 3,
+    title: 'Système de suivi des stagiaires',
+    intern: 'Sarah K.',
+    company: 'Sonatrach',
+    kind: 'Rapport',
+    version: 1,
+    date: '05/09/2026',
+    status: 'Validé',
+    published: true,
+  },
+  {
+    id: 4,
+    title: 'Intelligence artificielle pour la gestion des PFE',
+    intern: 'Mohamed A.',
+    company: 'Sonatrach',
+    kind: 'Mémoire',
+    version: 1,
+    date: '03/09/2026',
+    status: 'À corriger',
+    published: false,
+  },
+]
+export const supervisorTodo = [
+  { icon: '⚠️', text: '3 tâches à valider' },
+  { icon: '📄', text: '2 rapports à consulter' },
+  { icon: '📅', text: '1 rendez-vous aujourd\'hui' },
+  { icon: '🔔', text: '4 nouvelles notifications' },
+]
+
+export type Appointment = { id: number; time: string; title: string; date: string; intern?: string }
+
+export const supervisorAppointments: Appointment[] = [
+  { id: 1, time: '10:00', title: 'Réunion avec Ahmed', date: 'Aujourd\'hui', intern: 'Ahmed Ben Ali' },
+  { id: 2, time: '14:00', title: 'Suivi de Sara', date: 'Aujourd\'hui', intern: 'Sara Amrane' },
+]
+
+export const supervisorDeadlines = [
+  { id: 1, date: '20 septembre', title: 'Rapport intermédiaire' },
+  { id: 2, date: '30 septembre', title: 'Version finale' },
+]
+
+export const supervisorEventTypes = ['Réunion', 'Soutenance', 'Remise de rapport', 'Remise de mémoire', "Échéance d'activité"]
+
+export const supervisorActivityFeed = [
+  'Sara a ajouté une nouvelle tâche',
+  'Ahmed a envoyé son rapport',
+  'Yacine a terminé une activité',
+  'Vous avez validé une tâche',
+]
+
+export const supervisorDashboardStats = [
+  { label: 'Total stagiaires', value: '8' },
+  { label: 'Stages actifs', value: '5' },
+  { label: 'Stages terminés', value: '3' },
+  { label: 'Rapports en attente', value: '4' },
+]
+
+export const supervisorProgressChart = [
+  { name: 'Ahmed', progress: 70 },
+  { name: 'Sara', progress: 45 },
+  { name: 'Ali', progress: 60 },
+  { name: 'Yacine', progress: 90 },
+]
+export type SupervisorIntern = {
+  id: number
+  name: string
+  email: string
+  phone: string
+  company: string
+  project: string
+  type: 'PFE' | 'PFC'
+  status: 'Actif' | 'Terminé' | 'En attente'
+  startDate: string
+  endDate: string
+  progress: number
+}
+
+export const supervisorInternsDetailed: SupervisorIntern[] = [
+  {
+    id: 1,
+    name: 'Zineb Ouled Laid',
+    email: 'zineb@example.com',
+    phone: '0550000000',
+    company: 'Atlas Telecom',
+    project: 'Plateforme de gestion des stages',
+    type: 'PFE',
+    status: 'Actif',
+    startDate: '01/09/2026',
+    endDate: '31/12/2026',
+    progress: 45,
+  },
+  {
+    id: 2,
+    name: 'Ahmed Benali',
+    email: 'ahmed@example.com',
+    phone: '0551000000',
+    company: 'Atlas Telecom',
+    project: 'Application mobile de suivi',
+    type: 'PFC',
+    status: 'Actif',
+    startDate: '15/09/2026',
+    endDate: '15/11/2026',
+    progress: 30,
+  },
+  {
+    id: 3,
+    name: 'Sarah K.',
+    email: 'sarah@example.com',
+    phone: '0552000000',
+    company: 'Sonatrach',
+    project: 'Système de gestion documentaire',
+    type: 'PFE',
+    status: 'En attente',
+    startDate: '20/09/2026',
+    endDate: '20/01/2027',
+    progress: 0,
+  },
 ]
