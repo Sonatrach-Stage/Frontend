@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+/*import { Check } from 'lucide-react'
 import { cn } from '../../lib/shadcn/utils'
 
 export type StepItem = {
@@ -39,3 +39,4 @@ export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
     </div>
   )
 }
+*/

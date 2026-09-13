@@ -7,8 +7,6 @@ import {
   CheckSquare,
   FileText,
   FolderOpen,
-  MessageSquare,
-  User,
   Layers,
 } from 'lucide-react'
 
@@ -23,37 +21,56 @@ import SignupRequestPage from './pages/SignupRequestPage'
 import AdminSignupPage from './pages/AdminSignupPage'
 import RequestPendingPage from './pages/RequestPendingPage'
 import DashboardEntry from './pages/DashboardEntry'
+import ReportsAndThesesPage from './pages/dashboard/supervisor/ReportsAndThesesPage'
+import SupervisorActivitiesPage from './pages/dashboard/supervisor/ActivitiesPage'
+import SupervisorTasksPage from './pages/dashboard/supervisor/TasksPage'
 
 import type { SignupDraft } from './pages/data/internPilotData'
 
-import CompanyAdminDashboardTab from './pages/dashboard/company-admin/DashboardTab'
-import SupervisorDashboardTab from './pages/dashboard/supervisor/DashboardTab'
-import SuperAdminDashboardTab from './pages/dashboard/super-admin/DashboardTab'
-
 import { DashboardLayout } from './pages/dashboard/DashboardLayout'
 import { PlaceholderPage } from './pages/dashboard/PlaceholderPage'
-import {
-  companyAdminNav,
-  internNav,
-  supervisorNav,
-  superAdminNav,
-} from './pages/dashboard/navConfig'
-
+import { companyAdminNav, internNav, supervisorNav, superAdminNav } from './pages/dashboard/navConfig'
 import { getCurrentUser } from './lib/auth'
 
+// Company Admin
 import CompanyAdminHome from './pages/dashboard/company-admin/CompanyAdminHome'
+import CompanyAdminDashboardTab from './pages/dashboard/company-admin/DashboardTab'
 import RequestsPage from './pages/dashboard/company-admin/RequestsPage'
 import InternsPage from './pages/dashboard/company-admin/InternsPage'
 import AssignmentsPage from './pages/dashboard/company-admin/AssignmentsPage'
+import CompanyAdminDocumentsPage from './pages/dashboard/company-admin/DocumentsPage'
+import CompanyAdminNotificationsPage from './pages/dashboard/company-admin/NotificationsPage'
+import CompanyAdminProfilePage from './pages/dashboard/company-admin/ProfilePage'
 
+// Intern
 import InternHome from './pages/dashboard/intern/InternHome'
-import DashboardTab from './pages/dashboard/intern/DashboardTab'
+import InternDashboardTab from './pages/dashboard/intern/DashboardTab'
 import MyInternshipPage from './pages/dashboard/intern/MyInternshipPage'
 import MySupervisorPage from './pages/dashboard/intern/MySupervisorPage'
 import MyTasksPage from './pages/dashboard/intern/MyTasksPage'
+import MyReportPage from './pages/dashboard/intern/MyReportPage'
+import InternMessagesPage from './pages/dashboard/intern/MessagesPage'
+import InternDocumentsPage from './pages/dashboard/intern/MyDocumentsPage'
+import InternNotificationsPage from './pages/dashboard/intern/NotificationsPage'
+import InternProfilePage from './pages/dashboard/intern/ProfilePage'
 
-import SuperAdminHome from './pages/dashboard/SuperAdminHome'
+// Supervisor
 import SupervisorHome from './pages/dashboard/SupervisorHome'
+import SupervisorDashboardTab from './pages/dashboard/supervisor/DashboardTab'
+import SupervisorMessagesPage from './pages/dashboard/supervisor/MessagesPage'
+import SupervisorDocumentsPage from './pages/dashboard/supervisor/DocumentsPage'
+import SupervisorNotificationsPage from './pages/dashboard/supervisor/NotificationsPage'
+import SupervisorProfilePage from './pages/dashboard/supervisor/ProfilePage'
+
+// Super Admin
+import SuperAdminHome from './pages/dashboard/SuperAdminHome'
+import SuperAdminDashboardTab from './pages/dashboard/super-admin/DashboardTab'
+import CompaniesPage from './pages/dashboard/super-admin/CompaniesPage'
+import AdminsPage from './pages/dashboard/super-admin/AdminsPage'
+import SuperAdminInternsPage from './pages/dashboard/super-admin/InternsPage'
+import SupervisorsPage from './pages/dashboard/super-admin/SupervisorsPage'
+import SuperAdminDocumentsPage from './pages/dashboard/super-admin/DocumentsPage'
+import SuperAdminNotificationsPage from './pages/dashboard/super-admin/NotificationsPage'
 
 function RoleLayout({
   basePath,
@@ -65,19 +82,8 @@ function RoleLayout({
   roleLabel: string
 }) {
   const user = getCurrentUser()
-
-  if (!user) {
-    return <Navigate to="/" replace />
-  }
-
-  return (
-    <DashboardLayout
-      basePath={basePath}
-      navItems={navItems}
-      roleLabel={roleLabel}
-      user={user}
-    />
-  )
+  if (!user) return <Navigate to="/" replace />
+  return <DashboardLayout basePath={basePath} navItems={navItems} roleLabel={roleLabel} user={user} />
 }
 
 export default function App() {
@@ -107,577 +113,102 @@ export default function App() {
   })
 
   function updateSignupDraft(changes: Partial<SignupDraft>) {
-    setSignupDraft((currentDraft) => ({
-      ...currentDraft,
-      ...changes,
-    }))
+    setSignupDraft((currentDraft) => ({ ...currentDraft, ...changes }))
   }
 
   return (
     <Routes>
-      {/* =========================
-          AUTHENTIFICATION / INSCRIPTION
-          ========================= */}
-
+      {/* AUTH / INSCRIPTION */}
       <Route path="/" element={<LoginPage />} />
-
-      <Route
-        path="/signup"
-        element={
-          <SignupRolePage
-            draft={signupDraft}
-            updateDraft={updateSignupDraft}
-          />
-        }
-      />
-
-      <Route
-        path="/signup/information"
-        element={
-          <SignupInformationPage
-            draft={signupDraft}
-            updateDraft={updateSignupDraft}
-          />
-        }
-      />
-
-      <Route
-        path="/signup/company"
-        element={
-          <SignupCompanyPage
-            draft={signupDraft}
-            updateDraft={updateSignupDraft}
-          />
-        }
-      />
-
-      <Route
-        path="/signup/supervisor"
-        element={
-          <SignupSupervisorPage
-            draft={signupDraft}
-            updateDraft={updateSignupDraft}
-          />
-        }
-      />
-
+      <Route path="/signup" element={<SignupRolePage draft={signupDraft} updateDraft={updateSignupDraft} />} />
+      <Route path="/signup/information" element={<SignupInformationPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
+      <Route path="/signup/company" element={<SignupCompanyPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
+      <Route path="/signup/supervisor" element={<SignupSupervisorPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
       <Route path="/signup/admin" element={<AdminSignupPage />} />
+      <Route path="/signup/request" element={<SignupRequestPage draft={signupDraft} />} />
+      <Route path="/request-pending" element={<RequestPendingPage draft={signupDraft} />} />
 
-      <Route
-        path="/signup/request"
-        element={<SignupRequestPage draft={signupDraft} />}
-      />
-
-      <Route
-        path="/request-pending"
-        element={<RequestPendingPage draft={signupDraft} />}
-      />
-
-      {/* =========================
-          ENTRÉE DASHBOARD
-          ========================= */}
-
+      {/* ENTRÉE DASHBOARD */}
       <Route path="/dashboard" element={<DashboardEntry />} />
 
-      {/* =========================
-          ADMINISTRATEUR ENTREPRISE
-          ========================= */}
-
+      {/* ADMINISTRATEUR ENTREPRISE */}
       <Route
         path="/dashboard/company-admin"
-        element={
-          <RoleLayout
-            basePath="/dashboard/company-admin"
-            navItems={companyAdminNav}
-            roleLabel="Administrateur entreprise"
-          />
-        }
+        element={<RoleLayout basePath="/dashboard/company-admin" navItems={companyAdminNav} roleLabel="Administrateur entreprise" />}
       >
         <Route index element={<CompanyAdminHome />} />
-
-        <Route
-          path="tableau-de-bord"
-          element={<CompanyAdminDashboardTab />}
-        />
-
+        <Route path="tableau-de-bord" element={<CompanyAdminDashboardTab />} />
         <Route path="demandes" element={<RequestsPage />} />
-
         <Route path="stagiaires" element={<InternsPage />} />
-
         <Route path="affectations" element={<AssignmentsPage />} />
-
-        <Route
-          path="encadrants"
-          element={
-            <PlaceholderPage
-              icon={Layers}
-              title="Encadrants"
-              description="Liste des encadrants de votre entreprise — à connecter à l'API."
-            />
-          }
-        />
-
-        <Route
-          path="offres"
-          element={
-            <PlaceholderPage
-              icon={FileText}
-              title="Offres de stage"
-              description="Créez et publiez vos offres de stage."
-            />
-          }
-        />
-
-        <Route
-          path="activites"
-          element={
-            <PlaceholderPage
-              icon={CalendarDays}
-              title="Activités"
-              description="Activités liées aux stagiaires de l'entreprise."
-            />
-          }
-        />
-
-        <Route
-          path="taches"
-          element={
-            <PlaceholderPage
-              icon={CheckSquare}
-              title="Tâches"
-              description="Suivi des tâches assignées."
-            />
-          }
-        />
-
-        <Route
-          path="calendrier"
-          element={
-            <PlaceholderPage
-              icon={CalendarDays}
-              title="Calendrier"
-              description="Réunions, deadlines et rendez-vous."
-            />
-          }
-        />
-
-        <Route
-          path="documents"
-          element={
-            <PlaceholderPage
-              icon={FolderOpen}
-              title="Documents"
-              description="Bibliothèque documentaire de l'entreprise."
-            />
-          }
-        />
-
-        <Route
-          path="rapports"
-          element={
-            <PlaceholderPage
-              icon={FileText}
-              title="Rapports"
-              description="Rapports déposés par vos stagiaires."
-            />
-          }
-        />
-
-        <Route
-          path="notifications"
-          element={
-            <PlaceholderPage
-              icon={Bell}
-              title="Notifications"
-              description="Toutes vos notifications."
-            />
-          }
-        />
-
-        <Route
-          path="profil"
-          element={
-            <PlaceholderPage
-              icon={User}
-              title="Profil"
-              description="Gérez votre profil administrateur."
-            />
-          }
-        />
+        <Route path="encadrants" element={<PlaceholderPage icon={Layers} title="Encadrants" description="Liste des encadrants de votre entreprise." />} />
+        <Route path="offres" element={<PlaceholderPage icon={FileText} title="Offres de stage" description="Créez et publiez vos offres de stage." />} />
+        <Route path="activites" element={<PlaceholderPage icon={CalendarDays} title="Activités" description="Activités liées aux stagiaires." />} />
+        <Route path="taches" element={<PlaceholderPage icon={CheckSquare} title="Tâches" description="Suivi des tâches assignées." />} />
+        <Route path="calendrier" element={<PlaceholderPage icon={CalendarDays} title="Calendrier" description="Réunions, deadlines et rendez-vous." />} />
+        <Route path="documents" element={<CompanyAdminDocumentsPage />} />
+        <Route path="rapports" element={<PlaceholderPage icon={FileText} title="Rapports" description="Rapports déposés par vos stagiaires." />} />
+        <Route path="notifications" element={<CompanyAdminNotificationsPage />} />
+        <Route path="profil" element={<CompanyAdminProfilePage />} />
       </Route>
 
-      {/* =========================
-          STAGIAIRE
-          ========================= */}
-
+      {/* STAGIAIRE */}
       <Route
         path="/dashboard/intern"
-        element={
-          <RoleLayout
-            basePath="/dashboard/intern"
-            navItems={internNav}
-            roleLabel="Stagiaire"
-          />
-        }
+        element={<RoleLayout basePath="/dashboard/intern" navItems={internNav} roleLabel="Stagiaire" />}
       >
         <Route index element={<InternHome />} />
-
-        <Route
-          path="tableau-de-bord"
-          element={<DashboardTab />}
-        />
-
-        <Route
-          path="mon-stage"
-          element={<MyInternshipPage />}
-        />
-
-        <Route
-          path="mon-encadrant"
-          element={<MySupervisorPage />}
-        />
-
-        <Route
-          path="activites"
-          element={
-            <PlaceholderPage
-              icon={CalendarDays}
-              title="Mes activités"
-              description="Activités assignées par l'encadrant."
-            />
-          }
-        />
-
+        <Route path="tableau-de-bord" element={<InternDashboardTab />} />
+        <Route path="mon-stage" element={<MyInternshipPage />} />
+        <Route path="mon-encadrant" element={<MySupervisorPage />} />
+        <Route path="activites" element={<PlaceholderPage icon={CalendarDays} title="Mes activités" description="Activités assignées par l'encadrant." />} />
         <Route path="taches" element={<MyTasksPage />} />
-
-        <Route
-          path="calendrier"
-          element={
-            <PlaceholderPage
-              icon={CalendarDays}
-              title="Calendrier"
-              description="Réunions, deadlines et soutenance."
-            />
-          }
-        />
-
-        <Route
-          path="messages"
-          element={
-            <PlaceholderPage
-              icon={MessageSquare}
-              title="Messages"
-              description="Chat avec votre encadrant affecté uniquement."
-            />
-          }
-        />
-
-        <Route
-          path="rapport"
-          element={
-            <PlaceholderPage
-              icon={FileText}
-              title="Mon rapport / mémoire"
-              description="Upload, soumission et suivi de votre rapport ou mémoire."
-            />
-          }
-        />
-
-        <Route
-          path="documents"
-          element={
-            <PlaceholderPage
-              icon={FolderOpen}
-              title="Mes documents"
-              description="Convention, rapports, attestation."
-            />
-          }
-        />
-
-        <Route
-          path="ia"
-          element={
-            <PlaceholderPage
-              icon={Bot}
-              title="Assistant IA"
-              description="Résumez vos rapports et posez des questions sur vos documents."
-            />
-          }
-        />
-
-        <Route
-          path="notifications"
-          element={
-            <PlaceholderPage
-              icon={Bell}
-              title="Notifications"
-              description="Toutes vos notifications."
-            />
-          }
-        />
-
-        <Route
-          path="profil"
-          element={
-            <PlaceholderPage
-              icon={User}
-              title="Profil"
-              description="Gérez votre profil stagiaire."
-            />
-          }
-        />
+        <Route path="calendrier" element={<PlaceholderPage icon={CalendarDays} title="Calendrier" description="Réunions, deadlines et soutenance." />} />
+        <Route path="messages" element={<InternMessagesPage />} />
+        <Route path="rapport" element={<MyReportPage />} />
+        <Route path="documents" element={<InternDocumentsPage />} />
+        <Route path="ia" element={<PlaceholderPage icon={Bot} title="Assistant IA" description="Résumez vos rapports et posez des questions." />} />
+        <Route path="notifications" element={<InternNotificationsPage />} />
+        <Route path="profil" element={<InternProfilePage />} />
       </Route>
 
-      {/* =========================
-          ENCADRANT
-          ========================= */}
-
+      {/* ENCADRANT */}
       <Route
         path="/dashboard/supervisor"
-        element={
-          <RoleLayout
-            basePath="/dashboard/supervisor"
-            navItems={supervisorNav}
-            roleLabel="Encadrant"
-          />
-        }
+        element={<RoleLayout basePath="/dashboard/supervisor" navItems={supervisorNav} roleLabel="Encadrant" />}
       >
         <Route index element={<SupervisorHome />} />
-
-        <Route
-          path="tableau-de-bord"
-          element={<SupervisorDashboardTab />}
-        />
-
-        <Route
-          path="stagiaires"
-          element={
-            <PlaceholderPage
-              icon={Layers}
-              title="Mes stagiaires"
-              description="Stagiaires qui vous ont été affectés par l'administrateur."
-            />
-          }
-        />
-
-        <Route
-          path="affectations"
-          element={
-            <PlaceholderPage
-              icon={Layers}
-              title="Affectations"
-              description="Vos affectations en cours."
-            />
-          }
-        />
-
-        <Route
-          path="activites"
-          element={
-            <PlaceholderPage
-              icon={CalendarDays}
-              title="Activités"
-              description="Créez et assignez des activités."
-            />
-          }
-        />
-
-        <Route
-          path="taches"
-          element={
-            <PlaceholderPage
-              icon={CheckSquare}
-              title="Tâches"
-              description="Créez des tâches pour vos stagiaires."
-            />
-          }
-        />
-
-        <Route
-          path="calendrier"
-          element={
-            <PlaceholderPage
-              icon={CalendarDays}
-              title="Calendrier"
-              description="Réunions et rendez-vous."
-            />
-          }
-        />
-
-        <Route
-          path="messages"
-          element={
-            <PlaceholderPage
-              icon={MessageSquare}
-              title="Messages"
-              description="Chat avec vos stagiaires affectés."
-            />
-          }
-        />
-
-        <Route
-          path="rapports"
-          element={
-            <PlaceholderPage
-              icon={FileText}
-              title="Rapports et mémoires"
-              description="Documents soumis par vos stagiaires."
-            />
-          }
-        />
-
-        <Route
-          path="documents"
-          element={
-            <PlaceholderPage
-              icon={FolderOpen}
-              title="Documents"
-              description="Bibliothèque personnelle."
-            />
-          }
-        />
-
-        <Route
-          path="ia"
-          element={
-            <PlaceholderPage
-              icon={Bot}
-              title="Assistant IA"
-              description="Résumez et analysez les documents autorisés."
-            />
-          }
-        />
-
-        <Route
-          path="notifications"
-          element={
-            <PlaceholderPage
-              icon={Bell}
-              title="Notifications"
-              description="Toutes vos notifications."
-            />
-          }
-        />
-
-        <Route
-          path="profil"
-          element={
-            <PlaceholderPage
-              icon={User}
-              title="Profil"
-              description="Gérez votre profil encadrant."
-            />
-          }
-        />
+        <Route path="tableau-de-bord" element={<SupervisorDashboardTab />} />
+        <Route path="stagiaires" element={<PlaceholderPage icon={Layers} title="Mes stagiaires" description="Stagiaires affectés par l'administrateur." />} />
+        <Route path="affectations" element={<PlaceholderPage icon={Layers} title="Affectations" description="Vos affectations en cours." />} />
+        <Route path="activites" element={<SupervisorActivitiesPage />} />
+        <Route path="taches" element={<SupervisorTasksPage />} />
+        <Route path="calendrier" element={<PlaceholderPage icon={CalendarDays} title="Calendrier" description="Réunions et rendez-vous." />} />
+        <Route path="messages" element={<SupervisorMessagesPage />} />
+        <Route path="rapports" element={<ReportsAndThesesPage />} />
+        <Route path="documents" element={<SupervisorDocumentsPage />} />
+        <Route path="ia" element={<PlaceholderPage icon={Bot} title="Assistant IA" description="Résumez et analysez les documents autorisés." />} />
+        <Route path="notifications" element={<SupervisorNotificationsPage />} />
+        <Route path="profil" element={<SupervisorProfilePage />} />
       </Route>
 
-      {/* =========================
-          SUPER ADMINISTRATEUR
-          ========================= */}
-
+      {/* SUPER ADMINISTRATEUR */}
       <Route
         path="/dashboard/super-admin"
-        element={
-          <RoleLayout
-            basePath="/dashboard/super-admin"
-            navItems={superAdminNav}
-            roleLabel="Super Administrateur"
-          />
-        }
+        element={<RoleLayout basePath="/dashboard/super-admin" navItems={superAdminNav} roleLabel="Super Administrateur" />}
       >
         <Route index element={<SuperAdminHome />} />
-
-        <Route
-          path="tableau-de-bord"
-          element={<SuperAdminDashboardTab />}
-        />
-
-        <Route
-          path="entreprises"
-          element={
-            <PlaceholderPage
-              icon={Layers}
-              title="Entreprises"
-              description="Toutes les entreprises inscrites sur la plateforme."
-            />
-          }
-        />
-
-        <Route
-          path="administrateurs"
-          element={
-            <PlaceholderPage
-              icon={User}
-              title="Administrateurs"
-              description="Tous les administrateurs d'entreprise."
-            />
-          }
-        />
-
-        <Route
-          path="stagiaires"
-          element={
-            <PlaceholderPage
-              icon={Layers}
-              title="Stagiaires"
-              description="Tous les stagiaires, toutes entreprises confondues."
-            />
-          }
-        />
-
-        <Route
-          path="encadrants"
-          element={
-            <PlaceholderPage
-              icon={Layers}
-              title="Encadrants"
-              description="Tous les encadrants de la plateforme."
-            />
-          }
-        />
-
-        <Route
-          path="documents"
-          element={
-            <PlaceholderPage
-              icon={FolderOpen}
-              title="Documents"
-              description="Bibliothèque centralisée."
-            />
-          }
-        />
-
-        <Route
-          path="rapports"
-          element={
-            <PlaceholderPage
-              icon={FileText}
-              title="Rapports"
-              description="Tous les rapports de la plateforme."
-            />
-          }
-        />
-
-        <Route
-          path="notifications"
-          element={
-            <PlaceholderPage
-              icon={Bell}
-              title="Notifications"
-              description="Centre de notifications global."
-            />
-          }
-        />
+        <Route path="tableau-de-bord" element={<SuperAdminDashboardTab />} />
+        <Route path="entreprises" element={<CompaniesPage />} />
+        <Route path="administrateurs" element={<AdminsPage />} />
+        <Route path="stagiaires" element={<SuperAdminInternsPage />} />
+        <Route path="encadrants" element={<SupervisorsPage />} />
+        <Route path="documents" element={<SuperAdminDocumentsPage />} />
+        <Route path="rapports" element={<PlaceholderPage icon={FileText} title="Rapports" description="Tous les rapports de la plateforme." />} />
+        <Route path="notifications" element={<SuperAdminNotificationsPage />} />
       </Route>
 
-      {/* =========================
-          ROUTE PAR DÉFAUT
-          ========================= */}
-
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

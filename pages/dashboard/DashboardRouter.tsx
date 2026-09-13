@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+/*import { Navigate } from 'react-router-dom'
 import { getCurrentUser } from '../../lib/auth'
 
 import SuperAdminHome from './SuperAdminHome'
@@ -31,4 +31,4 @@ export default function DashboardRouter() {
     default:
       return <InternHome user={currentUser} />
   }
-}
+}*/

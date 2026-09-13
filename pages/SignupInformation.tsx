@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from 'react'
+/*import type { FormEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, Upload } from 'lucide-react'
 import { Button } from '../lib/shadcn/button'
@@ -19,8 +19,8 @@ const internSteps = [
   { number: 1, label: 'Type de stage' },
   { number: 2, label: 'Informations' },
   { number: 3, label: 'Entreprise' },
-  { number: 4, label: 'Encadrant' },
-  { number: 5, label: 'Demande' },
+  
+  { number: 4, label: 'Demande' },
 ]
 
 const supervisorSteps = [
@@ -218,3 +218,4 @@ function Field({ children, className, htmlFor, label }: { children: ReactNode; c
     </div>
   )
 }
+*/

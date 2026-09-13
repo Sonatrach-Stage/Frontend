@@ -67,12 +67,12 @@ export function DashboardLayout({ basePath, navItems, roleLabel, user }: Dashboa
             <Badge variant="outline" className="hidden rounded-full px-4 py-2 font-semibold sm:inline-flex">
               Vue: {roleLabel}
             </Badge>
-            <button type="button" aria-label="Notifications" className="relative rounded-full p-2 hover:bg-accent">
-              <Bell className="h-5 w-5 text-foreground" />
-              <span className="absolute right-1 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                3
-              </span>
-            </button>
+            <Link to={`${basePath}/notifications`} aria-label="Notifications" className="relative rounded-full p-2 hover:bg-accent">
+  <Bell className="h-5 w-5 text-foreground" />
+  <span className="absolute right-1 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+    3
+  </span>
+</Link>
             <div className="flex items-center gap-3 rounded-full border bg-card py-1 pl-1 pr-3 shadow-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[rgb(var(--intern-navy))] text-sm font-black text-white">
                 {user.avatarInitials}
