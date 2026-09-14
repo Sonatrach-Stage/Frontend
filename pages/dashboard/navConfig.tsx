@@ -41,7 +41,7 @@ export const companyAdminNav: NavItem[] = [
 export const internNav: NavItem[] = [
   { label: 'Accueil', icon: Grid2X2, path: '' },
   { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
-  { label: 'Mon stage', icon: BriefcaseBusiness, path: 'mon-stage' },
+  
   { label: 'Mon encadrant', icon: UserCog, path: 'mon-encadrant' },
   { label: 'Mes activités', icon: CalendarDays, path: 'activites' },
   { label: 'Mes tâches', icon: CheckSquare, path: 'taches' },

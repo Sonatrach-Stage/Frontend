@@ -11,6 +11,10 @@ import {
 } from 'lucide-react'
 
 import './appTheme.css'
+import MyActivitiesPage from './pages/dashboard/intern/MyActivitiesPage'
+import InternCalendarPage from './pages/dashboard/intern/CalendarPage'
+
+import AssistantIAPage from './pages/dashboard/intern/AssistantIAPage'
 
 import LoginPage from './pages/LoginPage'
 import SupervisorInternsPage from './pages/dashboard/supervisor/InternsPage'
@@ -48,7 +52,7 @@ import CompanyAdminProfilePage from './pages/dashboard/company-admin/ProfilePage
 // Intern
 import InternHome from './pages/dashboard/intern/InternHome'
 import InternDashboardTab from './pages/dashboard/intern/DashboardTab'
-import MyInternshipPage from './pages/dashboard/intern/MyInternshipPage'
+
 import MySupervisorPage from './pages/dashboard/intern/MySupervisorPage'
 import MyTasksPage from './pages/dashboard/intern/MyTasksPage'
 import MyReportPage from './pages/dashboard/intern/MyReportPage'
@@ -149,6 +153,7 @@ export default function App() {
         <Route path="activites" element={<PlaceholderPage icon={CalendarDays} title="Activités" description="Activités liées aux stagiaires." />} />
         <Route path="taches" element={<PlaceholderPage icon={CheckSquare} title="Tâches" description="Suivi des tâches assignées." />} />
         <Route path="calendrier" element={<PlaceholderPage icon={CalendarDays} title="Calendrier" description="Réunions, deadlines et rendez-vous." />} />
+        
         <Route path="documents" element={<CompanyAdminDocumentsPage />} />
         <Route path="rapports" element={<PlaceholderPage icon={FileText} title="Rapports" description="Rapports déposés par vos stagiaires." />} />
         <Route path="notifications" element={<CompanyAdminNotificationsPage />} />
@@ -156,25 +161,24 @@ export default function App() {
       </Route>
 
       {/* STAGIAIRE */}
+            {/* STAGIAIRE */}
       <Route
         path="/dashboard/intern"
         element={<RoleLayout basePath="/dashboard/intern" navItems={internNav} roleLabel="Stagiaire" />}
       >
         <Route index element={<InternHome />} />
         <Route path="tableau-de-bord" element={<InternDashboardTab />} />
-        <Route path="mon-stage" element={<MyInternshipPage />} />
         <Route path="mon-encadrant" element={<MySupervisorPage />} />
-        <Route path="activites" element={<PlaceholderPage icon={CalendarDays} title="Mes activités" description="Activités assignées par l'encadrant." />} />
         <Route path="taches" element={<MyTasksPage />} />
-        <Route path="calendrier" element={<PlaceholderPage icon={CalendarDays} title="Calendrier" description="Réunions, deadlines et soutenance." />} />
         <Route path="messages" element={<InternMessagesPage />} />
+        <Route path="activites" element={<MyActivitiesPage />} />
+        <Route path="calendrier" element={<InternCalendarPage />} />
         <Route path="rapport" element={<MyReportPage />} />
+        <Route path="ia" element={<AssistantIAPage />} />
         <Route path="documents" element={<InternDocumentsPage />} />
-        <Route path="ia" element={<PlaceholderPage icon={Bot} title="Assistant IA" description="Résumez vos rapports et posez des questions." />} />
         <Route path="notifications" element={<InternNotificationsPage />} />
         <Route path="profil" element={<InternProfilePage />} />
       </Route>
-
       {/* ENCADRANT */}
       <Route
         path="/dashboard/supervisor"

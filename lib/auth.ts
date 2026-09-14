@@ -10,6 +10,7 @@ export type CurrentUser = {
   companyName?: string
   status: RequestStatus
   avatarInitials: string
+  internType?: 'PFE' | 'PFC'
 }
 
 const STORAGE_KEY = 'stagelink_current_user'

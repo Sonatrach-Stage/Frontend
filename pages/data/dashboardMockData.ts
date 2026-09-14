@@ -329,3 +329,67 @@ export const supervisorInternsDetailed: SupervisorIntern[] = [
     progress: 0,
   },
 ]
+export const internDashboardStats = [
+  { label: 'Stage', value: '120 jours' },
+  { label: 'Progression', value: '65%' },
+  { label: 'Tâches terminées', value: '24' },
+  { label: 'Activités réalisées', value: '12' },
+  { label: 'Documents', value: '8' },
+  { label: 'Jours restants', value: '45' },
+]
+
+export const internTimeline = [
+  { label: 'Stage commencé', done: true },
+  { label: 'Convention validée', done: true },
+  { label: 'Sujet validé', done: true },
+  { label: 'Première activité', done: true },
+  { label: 'Rapport intermédiaire', done: false },
+  { label: 'Rapport final', done: false },
+  { label: 'Soutenance', done: false },
+]
+
+export const internDeadlines = [
+  { icon: '📄', text: 'Remise version 2 du rapport', date: '20 septembre' },
+  { icon: '📅', text: 'Réunion avec encadrant', date: '22 septembre' },
+  { icon: '🎓', text: 'Soutenance', date: '15 décembre' },
+]
+
+export type InternActivity = {
+  id: number
+  title: string
+  description: string
+  date: string
+  duration: string
+  category: string
+  status: 'En attente' | 'En cours de validation' | 'Validée' | 'Refusée'
+}
+
+export const internActivities: InternActivity[] = [
+  { id: 1, title: 'Analyse des besoins', description: 'Recueil des besoins fonctionnels.', date: '05/09', duration: '4h', category: 'Analyse', status: 'Validée' },
+  { id: 2, title: 'Maquettage', description: 'Création des maquettes UI.', date: '08/09', duration: '6h', category: 'Conception', status: 'En cours de validation' },
+]
+
+export type ReportVersionEntry = {
+  version: number
+  date: string
+  status: ThesisStatus
+  comment?: string
+}
+
+export const internReportHistory: ReportVersionEntry[] = [
+  { version: 1, date: '01/09/2026', status: 'Validé' },
+  { version: 2, date: '12/09/2026', status: 'À corriger', comment: 'Revoir la problématique et ajouter les références bibliographiques.' },
+]
+
+export const internAppointments: Appointment[] = [
+  { id: 1, time: '10:00', title: 'Réunion avec encadrant', date: '15 septembre' },
+]
+export const internWeeklyTasks = [
+  { week: 'S1', count: 3 }, { week: 'S2', count: 5 }, { week: 'S3', count: 4 }, { week: 'S4', count: 6 },
+]
+
+export const internWeeklyActivities = [
+  { week: 'S1', count: 2 }, { week: 'S2', count: 3 }, { week: 'S3', count: 3 }, { week: 'S4', count: 4 },
+]
+
+export const internTimeRemainingPercent = 27
