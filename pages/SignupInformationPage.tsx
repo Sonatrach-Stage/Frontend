@@ -543,21 +543,27 @@ function InternFields({
       </Field>
 
       <Field
-        label="Secteur du stage"
-        htmlFor="sector"
-        error={errors.sector}
-      >
-        <Input
-          id="sector"
-          value={draft.sector}
-          onChange={(e) => {
-            onChange({ sector: e.target.value })
-            onClearError('sector')
-          }}
-          placeholder="Data & IA"
-          className="h-10 rounded-xl shadow-sm"
-        />
-      </Field>
+  label="Secteur du stage"
+  htmlFor="sector"
+  error={errors.sector}
+>
+  <Select
+    value={draft.sector}
+    onValueChange={(value) => {
+      onChange({ sector: value })
+      onClearError('sector')
+    }}
+  >
+    <SelectTrigger id="sector" className="h-10 rounded-xl shadow-sm">
+      <SelectValue placeholder="Choisir un secteur" />
+    </SelectTrigger>
+    <SelectContent>
+      {departments.map((dept) => (
+        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</Field>
       <Field
         label="Mot de passe"
         htmlFor="password"
@@ -781,22 +787,27 @@ function SupervisorFields({
       </Field>
 
       <Field
-        label="Département"
-        htmlFor="department"
-        error={errors.department}
-      >
-        <Input
-          id="department"
-          value={draft.department}
-          onChange={(e) => {
-            onChange({ department: e.target.value })
-            onClearError('department')
-          }}
-          placeholder="Infrastructure"
-          className="h-10 rounded-xl shadow-sm"
-        />
-      </Field>
-
+  label="Département"
+  htmlFor="department"
+  error={errors.department}
+>
+  <Select
+    value={draft.department}
+    onValueChange={(value) => {
+      onChange({ department: value })
+      onClearError('department')
+    }}
+  >
+    <SelectTrigger id="department" className="h-10 rounded-xl shadow-sm">
+      <SelectValue placeholder="Choisir un département" />
+    </SelectTrigger>
+    <SelectContent>
+      {departments.map((dept) => (
+        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</Field>
       <Field
         label="Spécialisation"
         htmlFor="specialization"

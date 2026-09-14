@@ -20,21 +20,18 @@ import {
 } from 'lucide-react'
 
 import type { NavItem } from './DashboardLayout'
-
 export const companyAdminNav: NavItem[] = [
   { label: 'Accueil', icon: Grid2X2, path: '' },
   { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
-  { label: 'Demandes de stage', icon: ClipboardList, path: 'demandes' },
+  { label: 'Demandes de validation', icon: ClipboardList, path: 'validations' },
   { label: 'Mes stagiaires', icon: Users, path: 'stagiaires' },
   { label: 'Encadrants', icon: Briefcase, path: 'encadrants' },
   { label: 'Affectations', icon: Layers, path: 'affectations' },
-  { label: 'Offres de stage', icon: Briefcase, path: 'offres' },
-  { label: 'Activités', icon: CalendarDays, path: 'activites' },
-  { label: 'Tâches', icon: CheckSquare, path: 'taches' },
-  { label: 'Calendrier', icon: CalendarDays, path: 'calendrier' },
-  { label: 'Documents', icon: FolderOpen, path: 'documents' },
+  
   { label: 'Rapports', icon: FileText, path: 'rapports' },
+  { label: 'Assistant IA', icon: Bot, path: 'ia' },
   { label: 'Notifications', icon: Bell, path: 'notifications' },
+  { label: 'Entreprise', icon: Building2, path: 'entreprise' },
   { label: 'Profil', icon: User, path: 'profil' },
 ]
 
@@ -73,13 +70,12 @@ export const supervisorNav: NavItem[] = [
 export const superAdminNav: NavItem[] = [
   { label: 'Accueil', icon: Grid2X2, path: '' },
   { label: 'Tableau de bord', icon: LayoutDashboard, path: 'tableau-de-bord' },
-  { label: 'Utilisateurs', icon: Users, path: 'utilisateurs' },
+  { label: 'Demandes', icon: ClipboardList, path: 'demandes' },
   { label: 'Entreprises', icon: Building2, path: 'entreprises' },
   { label: 'Stagiaires', icon: GraduationCap, path: 'stagiaires' },
   { label: 'Encadrants', icon: UserCog, path: 'encadrants' },
-  { label: 'Demandes', icon: ClipboardList, path: 'demandes' },
   { label: 'Documents', icon: FolderOpen, path: 'documents' },
   { label: 'Rapports', icon: FileText, path: 'rapports' },
+  { label: 'Assistant IA', icon: Bot, path: 'ia' },
   { label: 'Notifications', icon: Bell, path: 'notifications' },
-  { label: 'Profil', icon: User, path: 'profil' },
 ]

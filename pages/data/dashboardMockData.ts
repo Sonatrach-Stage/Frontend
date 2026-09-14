@@ -362,11 +362,12 @@ export type InternActivity = {
   duration: string
   category: string
   status: 'En attente' | 'En cours de validation' | 'Validée' | 'Refusée'
+  source: 'supervisor' | 'intern'
 }
 
 export const internActivities: InternActivity[] = [
-  { id: 1, title: 'Analyse des besoins', description: 'Recueil des besoins fonctionnels.', date: '05/09', duration: '4h', category: 'Analyse', status: 'Validée' },
-  { id: 2, title: 'Maquettage', description: 'Création des maquettes UI.', date: '08/09', duration: '6h', category: 'Conception', status: 'En cours de validation' },
+  { id: 1, title: 'Analyse des besoins', description: 'Recueil des besoins fonctionnels.', date: '05/09', duration: '4h', category: 'Analyse', status: 'Validée', source: 'supervisor' },
+  { id: 2, title: 'Maquettage', description: 'Création des maquettes UI.', date: '08/09', duration: '6h', category: 'Conception', status: 'En cours de validation', source: 'supervisor' },
 ]
 
 export type ReportVersionEntry = {
@@ -393,3 +394,102 @@ export const internWeeklyActivities = [
 ]
 
 export const internTimeRemainingPercent = 27
+// --- Demandes de validation de compte (différent des demandes de stage) ---
+export type AccountValidationRequest = {
+  id: number
+  name: string
+  email: string
+  phone: string
+  role: 'Stagiaire' | 'Encadrant'
+  type?: 'PFE' | 'PFC'
+  university?: string
+  fonction?: string
+  department?: string
+  date: string
+  status: 'En attente' | 'Accepté' | 'Refusé'
+  refusalReason?: string
+}
+
+export const accountValidationRequests: AccountValidationRequest[] = [
+  { id: 1, name: 'Sara Amrani', email: 'sara@email.com', phone: '+213 555 00 01', role: 'Stagiaire', type: 'PFE', university: 'USTHB', date: '14/09/2026', status: 'En attente' },
+  { id: 2, name: 'Ahmed Kaci', email: 'ahmed.k@email.com', phone: '+213 555 00 02', role: 'Stagiaire', type: 'PFC', university: 'ENSIAS', date: '13/09/2026', status: 'En attente' },
+  { id: 3, name: 'Karim Bennani', email: 'karim@email.com', phone: '+213 555 00 03', role: 'Encadrant', fonction: 'Ingénieur logiciel', department: 'IT', date: '14/09/2026', status: 'En attente' },
+]
+
+// --- Entreprise (séparé du profil personnel) ---
+export type CompanyInfo = {
+  name: string
+  description: string
+  address: string
+  website: string
+  email: string
+  phone: string
+  registrationNumber: string
+  companyId: string
+  createdAt: string
+  contactName: string
+  contactEmail: string
+  contactPhone: string
+}
+
+export const companyInfo: CompanyInfo = {
+  name: 'Atlas Telecom',
+  description: 'Opérateur télécom et infrastructures réseau.',
+  address: 'Technopark, Alger',
+  website: 'https://atlas-telecom.dz',
+  email: 'contact@atlas-telecom.dz',
+  phone: '+213 21 00 00 11',
+  registrationNumber: 'AT-2024-0187',
+  companyId: '1',
+  createdAt: '12/01/2024',
+  contactName: 'Ahmed Benali',
+  contactEmail: 'ahmed.benali@atlas-telecom.dz',
+  contactPhone: '+213 661 23 45 10',
+}
+
+export const companyOngoingInternships = [
+  { intern: 'Sara Amrani', type: 'PFE' as const, supervisor: 'Karim Bennani', subject: 'Application RH', progress: 70, endDate: '30/06', status: 'Actif' },
+  { intern: 'Ahmed Kaci', type: 'PFC' as const, supervisor: 'Salma Idrissi', subject: 'Gestion des stages', progress: 45, endDate: '30/12', status: 'Actif' },
+]
+
+export const companyAdminDashboardStats = [
+  { label: 'Total stagiaires', value: '24' },
+  { label: 'Stagiaires PFE', value: '14' },
+  { label: 'Stagiaires PFC', value: '10' },
+  { label: 'Encadrants actifs', value: '10' },
+  { label: 'Stages en cours', value: '18' },
+  { label: 'Demandes en attente', value: '5' },
+  { label: 'Rapports en attente', value: '4' },
+  { label: 'Documents à valider', value: '6' },
+]
+
+export const stageStatusBreakdown = [
+  { label: 'En attente', count: 5 },
+  { label: 'En cours', count: 18 },
+  { label: 'Terminés', count: 9 },
+  { label: 'Refusés', count: 2 },
+]
+
+export const monthlyRequests = [
+  { month: 'Juin', count: 6 }, { month: 'Juil', count: 9 }, { month: 'Août', count: 4 }, { month: 'Sept', count: 12 },
+]
+// --- Affectations par département ---
+export const internshipRequestsWithDept = [
+  { name: 'Sara Amrani', formation: 'Génie logiciel', type: 'PFE', startDate: '01/09/2026', status: 'En attente', department: 'IT' },
+  { name: 'Lina Berrada', formation: 'Réseaux', type: 'PFC', startDate: '05/09/2026', status: 'En attente', department: 'Infrastructure' },
+  { name: 'Yacine Ali', formation: 'RH digital', type: 'PFC', startDate: '02/09/2026', status: 'En attente', department: 'RH' },
+]
+
+// --- Super Admin : Demandes d'ouverture d'entreprise (accept/refuse) ---
+export type CompanyRequest = {
+  id: number
+  company: string
+  responsible: string
+  date: string
+  status: 'En attente' | 'Acceptée' | 'Refusée'
+}
+
+export const companyRequests: CompanyRequest[] = [
+  { id: 1, company: 'ABC', responsible: 'Ahmed', date: '08/09/2026', status: 'En attente' },
+  { id: 2, company: 'XYZ', responsible: 'Sara', date: '08/09/2026', status: 'En attente' },
+]
