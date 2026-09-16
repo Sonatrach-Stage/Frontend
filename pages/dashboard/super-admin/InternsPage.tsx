@@ -3,6 +3,7 @@ import { Badge } from '../../../lib/shadcn/badge'
 import { Card } from '../../../lib/shadcn/card'
 import { allInterns } from '../../data/dashboardMockData'
 import { cn } from '../../../lib/shadcn/utils'
+import { supervisorInternsDetailed, type SupervisorIntern } from '../../data/dashboardMockData'
 
 export default function InternsPage() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'PFE' | 'PFC'>('all')

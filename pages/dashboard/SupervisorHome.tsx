@@ -2,15 +2,26 @@ import { Link } from 'react-router-dom'
 import { Card } from '../../lib/shadcn/card'
 import { Badge } from '../../lib/shadcn/badge'
 import { Button } from '../../lib/shadcn/button'
-import { supervisorInternsDetailed, supervisorTodo } from '../data/dashboardMockData'
+import type { SupervisorIntern } from '../data/dashboardMockData'
+
+import {
+  supervisorInternsDetailed,
+  supervisorTodo,
+} from '../data/dashboardMockData'
 import { getCurrentUser } from '../../lib/auth'
+
 
 export default function SupervisorHome() {
   const user = getCurrentUser()
 
   const cards = [
     { label: 'Mes stagiaires', value: supervisorInternsDetailed.length },
-    { label: 'Stages actifs', value: supervisorInternsDetailed.filter((i) => i.status === 'En cours').length },
+    {
+  label: 'Stages actifs',
+  value: supervisorInternsDetailed.filter(
+    (i: SupervisorIntern) => i.status === 'Actif'
+  ).length,
+},
     { label: 'Tâches à vérifier', value: 7 },
   ]
 
@@ -51,7 +62,7 @@ export default function SupervisorHome() {
               </tr>
             </thead>
             <tbody>
-              {supervisorInternsDetailed.map((intern) => (
+              {supervisorInternsDetailed.map((intern: SupervisorIntern) => (
                 <tr key={intern.id} className="border-b last:border-0">
                   <td className="py-3 pr-4 font-bold text-foreground">{intern.name}</td>
                   <td className="py-3 pr-4">
@@ -77,7 +88,7 @@ export default function SupervisorHome() {
       <Card className="mt-6 rounded-3xl p-6 shadow-retool-sm">
         <h2 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">À faire</h2>
         <div className="mt-4 space-y-2">
-          {supervisorTodo.map((item) => (
+         {supervisorTodo.map((item: { icon: string; text: string }) => (
             <div key={item.text} className="flex items-center gap-3 rounded-xl border bg-background/70 p-3 text-sm font-semibold text-foreground">
               <span>{item.icon}</span>
               {item.text}

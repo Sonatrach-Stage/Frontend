@@ -11,7 +11,8 @@ export default function InternsPage() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<'Tous' | 'PFE' | 'PFC'>('Tous')
   const [statusFilter, setStatusFilter] = useState<'Tous' | 'En cours' | 'Terminé'>('Tous')
-  const [selected, setSelected] = useState<SupervisorInternDetail | null>(null)
+ const [selected, setSelected] =
+  useState<SupervisorIntern | null>(null)
 
   const filtered = supervisorInternsDetailed.filter((intern) => {
     const matchesSearch = intern.name.toLowerCase().includes(search.toLowerCase())
@@ -55,7 +56,7 @@ export default function InternsPage() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[rgb(var(--intern-soft-blue))] text-lg font-black text-[rgb(var(--intern-navy))]">
-                {selected.name.split(' ').map((p) => p[0]).join('').slice(0, 2)}
+                {selected.name.split(' ').map((p: string) => p[0]).join('').slice(0, 2)}
               </div>
               <div>
                 <p className="text-lg font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{selected.name}</p>
@@ -83,10 +84,10 @@ export default function InternsPage() {
             <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Projet</p>
             <p className="mt-2 text-sm text-muted-foreground">{selected.description}</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {selected.objectives.map((o) => <Badge key={o} variant="outline" className="rounded-full">{o}</Badge>)}
+              {selected.objectives.map((o: string) => <Badge key={o} variant="outline" className="rounded-full">{o}</Badge>)}
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {selected.technologies.map((t) => <Badge key={t} className="rounded-full bg-[rgb(var(--intern-navy))] text-white hover:bg-[rgb(var(--intern-navy))]">{t}</Badge>)}
+              {selected.technologies.map((t: string) => <Badge key={t} className="rounded-full bg-[rgb(var(--intern-navy))] text-white hover:bg-[rgb(var(--intern-navy))]">{t}</Badge>)}
             </div>
           </div>
 

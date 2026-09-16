@@ -7,6 +7,8 @@ export type SignupDraft = {
   internType: InternType
   selectedCompanyId: number | null
   selectedSupervisorId: number | null
+  password: string
+  confirmPassword: string
 
   // Informations stagiaire
   name: string
@@ -170,3 +172,4 @@ export const activityItems = [
   { title: 'Réunion encadrant', meta: 'Aujourd’hui à 15:00 avec Karim Bennani', status: 'Planifiée' },
   { title: 'Rapport intermédiaire', meta: 'Version brouillon sauvegardée', status: 'À compléter' },
 ]
+export const departments = ['IT', 'RH', 'Finance', 'Marketing', 'Infrastructure', 'R&D', 'Sécurité'] as const

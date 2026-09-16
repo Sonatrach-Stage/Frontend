@@ -1,11 +1,24 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
+
+import type { InternType, SignupDraft } from './data/internPilotData'
+const departments = [
+  'Informatique',
+  'Développement logiciel',
+  'Cybersécurité',
+  'Intelligence artificielle',
+  'Réseaux et systèmes',
+  'Data Science',
+  'Business Intelligence',
+  'Télécommunications',
+  'Automatique',
+  'Électronique',
+]
+
 import {
   ArrowLeft,
   ArrowRight,
- 
   Camera,
-  CheckCircle2,
   FileText,
   Upload,
   X,
@@ -13,6 +26,7 @@ import {
 
 import { Button } from '../lib/shadcn/button'
 import { Input } from '../lib/shadcn/input'
+
 import {
   Select,
   SelectContent,
@@ -20,10 +34,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../lib/shadcn/select'
+
 import { Textarea } from '../lib/shadcn/textarea'
 import { AuthHeader } from './ui/AuthHeader'
 import { StepIndicator } from './ui/StepIndicator'
-import type { InternType, SignupDraft } from './data/internPilotData'
+
 import { cn } from '../lib/shadcn/utils'
 
 type SignupInformationPageProps = {
@@ -37,7 +52,6 @@ const internSteps = [
   { number: 1, label: 'Type de stage' },
   { number: 2, label: 'Informations' },
   { number: 3, label: 'Entreprise' },
-  
   { number: 4, label: 'Demande' },
 ]
 
@@ -53,16 +67,21 @@ export default function SignupInformationPage({
   updateDraft,
 }: SignupInformationPageProps) {
   const navigate = useNavigate()
+
   const isSupervisor = draft.role === 'supervisor'
 
   const [errors, setErrors] = useState<Errors>({})
-
   const [profilePreview, setProfilePreview] = useState<string | null>(null)
   const [conventionName, setConventionName] = useState<string>('')
+
+  // ==========================================
+  // APERÇU PHOTO
+  // ==========================================
 
   useEffect(() => {
     if (draft.profil_image) {
       const url = URL.createObjectURL(draft.profil_image)
+
       setProfilePreview(url)
 
       return () => {
@@ -73,6 +92,10 @@ export default function SignupInformationPage({
     setProfilePreview(null)
   }, [draft.profil_image])
 
+  // ==========================================
+  // NOM CONVENTION
+  // ==========================================
+
   useEffect(() => {
     if (draft.convention_file) {
       setConventionName(draft.convention_file.name)
@@ -80,6 +103,10 @@ export default function SignupInformationPage({
       setConventionName('')
     }
   }, [draft.convention_file])
+
+  // ==========================================
+  // VALIDATION STAGIAIRE
+  // ==========================================
 
   function validateIntern(): Errors {
     const newErrors: Errors = {}
@@ -90,7 +117,9 @@ export default function SignupInformationPage({
 
     if (!draft.email.trim()) {
       newErrors.email = "L'e-mail est obligatoire."
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)) {
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)
+    ) {
       newErrors.email = "L'e-mail n'est pas valide."
     }
 
@@ -99,45 +128,61 @@ export default function SignupInformationPage({
     }
 
     if (!draft.establishment.trim()) {
-      newErrors.establishment = "L'établissement universitaire est obligatoire."
+      newErrors.establishment =
+        "L'établissement universitaire est obligatoire."
     }
 
     if (!draft.studies_level.trim()) {
-      newErrors.studies_level = 'Le niveau d’études est obligatoire.'
+      newErrors.studies_level =
+        'Le niveau d’études est obligatoire.'
     }
 
     if (!draft.sector.trim()) {
-      newErrors.sector = 'Le secteur du stage est obligatoire.'
+      newErrors.sector =
+        'Le secteur du stage est obligatoire.'
     }
 
     if (!draft.start_date) {
-      newErrors.start_date = 'La date de début est obligatoire.'
+      newErrors.start_date =
+        'La date de début est obligatoire.'
     }
 
     if (!draft.end_date) {
-      newErrors.end_date = 'La date de fin est obligatoire.'
+      newErrors.end_date =
+        'La date de fin est obligatoire.'
     }
 
     if (draft.start_date && draft.end_date) {
-      if (new Date(draft.end_date) <= new Date(draft.start_date)) {
+      if (
+        new Date(draft.end_date) <=
+        new Date(draft.start_date)
+      ) {
         newErrors.end_date =
           'La date de fin doit être après la date de début.'
       }
     }
 
     if (!draft.profil_image) {
-      newErrors.profil_image = 'La photo de profil est obligatoire.'
+      newErrors.profil_image =
+        'La photo de profil est obligatoire.'
     }
 
     if (!draft.password.trim()) {
-      newErrors.password = 'Le mot de passe est obligatoire.'
+      newErrors.password =
+        'Le mot de passe est obligatoire.'
     } else if (draft.password.length < 8) {
       newErrors.password =
         'Le mot de passe doit contenir au moins 8 caractères.'
     }
+    if (!draft.confirmPassword.trim()) {
+  newErrors.confirmPassword = 'La confirmation du mot de passe est obligatoire.'
+} else if (draft.confirmPassword !== draft.password) {
+  newErrors.confirmPassword = 'Les mots de passe ne correspondent pas.'
+}
 
     if (!draft.memoire.trim()) {
-      newErrors.memoire = 'Le sujet du mémoire est obligatoire.'
+      newErrors.memoire =
+        'Le sujet du mémoire est obligatoire.'
     }
 
     if (!draft.convention_file) {
@@ -148,99 +193,128 @@ export default function SignupInformationPage({
     return newErrors
   }
 
+  // ==========================================
+  // VALIDATION ENCADRANT
+  // ==========================================
+
   function validateSupervisor(): Errors {
-  const newErrors: Errors = {}
+    const newErrors: Errors = {}
 
-  if (!draft.supervisor_id.trim()) {
-    newErrors.supervisor_id =
-      "L'ID de l'encadrant est obligatoire."
+    if (!draft.supervisor_id.trim()) {
+      newErrors.supervisor_id =
+        "L'ID de l'encadrant est obligatoire."
+    }
+
+    if (!draft.name.trim()) {
+      newErrors.name =
+        'Le nom complet est obligatoire.'
+    }
+
+    if (!draft.email.trim()) {
+      newErrors.email =
+        "L'e-mail professionnel est obligatoire."
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)
+    ) {
+      newErrors.email =
+        "L'e-mail n'est pas valide."
+    }
+
+    if (!draft.phone.trim()) {
+      newErrors.phone =
+        'Le téléphone est obligatoire.'
+    }
+
+    if (!draft.job.trim()) {
+      newErrors.job =
+        'Le poste est obligatoire.'
+    }
+
+    if (!draft.department.trim()) {
+      newErrors.department =
+        'Le département est obligatoire.'
+    }
+
+    if (!draft.specialization.trim()) {
+      newErrors.specialization =
+        'La spécialisation est obligatoire.'
+    }
+
+    if (!draft.years_of_experience.trim()) {
+      newErrors.years_of_experience =
+        "Le nombre d'années d'expérience est obligatoire."
+    } else if (
+      Number(draft.years_of_experience) < 0
+    ) {
+      newErrors.years_of_experience =
+        "Le nombre d'années d'expérience n'est pas valide."
+    }
+
+    if (!draft.profil_image) {
+      newErrors.profil_image =
+        'La photo de profil est obligatoire.'
+    }
+
+    if (!draft.password.trim()) {
+      newErrors.password =
+        'Le mot de passe est obligatoire.'
+    } else if (draft.password.length < 8) {
+      newErrors.password =
+        'Le mot de passe doit contenir au moins 8 caractères.'
+    }
+
+    return newErrors
   }
 
-  if (!draft.name.trim()) {
-    newErrors.name =
-      'Le nom complet est obligatoire.'
-  }
+  // ==========================================
+  // SOUMISSION
+  // ==========================================
 
-  if (!draft.email.trim()) {
-    newErrors.email =
-      "L'e-mail professionnel est obligatoire."
-  } else if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email)
+  function submitForm(
+    event: FormEvent<HTMLFormElement>,
   ) {
-    newErrors.email =
-      "L'e-mail n'est pas valide."
+    event.preventDefault()
+
+    const validationErrors = isSupervisor
+      ? validateSupervisor()
+      : validateIntern()
+
+    setErrors(validationErrors)
+
+    if (Object.keys(validationErrors).length > 0) {
+      return
+    }
+
+    if (isSupervisor) {
+      navigate('/signup/request')
+    } else {
+      navigate('/signup/company')
+    }
   }
 
-  if (!draft.phone.trim()) {
-    newErrors.phone =
-      'Le téléphone est obligatoire.'
-  }
+  // ==========================================
+  // SUPPRESSION ERREUR
+  // ==========================================
 
-  if (!draft.job.trim()) {
-    newErrors.job =
-      'Le poste est obligatoire.'
-  }
-
-  if (!draft.department.trim()) {
-    newErrors.department =
-      'Le département est obligatoire.'
-  }
-
-  if (!draft.specialization.trim()) {
-    newErrors.specialization =
-      'La spécialisation est obligatoire.'
-  }
-
-  if (!draft.years_of_experience.trim()) {
-    newErrors.years_of_experience =
-      "Le nombre d'années d'expérience est obligatoire."
-  } else if (Number(draft.years_of_experience) < 0) {
-    newErrors.years_of_experience =
-      "Le nombre d'années d'expérience n'est pas valide."
-  }
-
-  if (!draft.profil_image) {
-    newErrors.profil_image =
-      'La photo de profil est obligatoire.'
-  }
-
-  if (!draft.password.trim()) {
-    newErrors.password =
-      'Le mot de passe est obligatoire.'
-  } else if (draft.password.length < 8) {
-    newErrors.password =
-      'Le mot de passe doit contenir au moins 8 caractères.'
-  }
-
-  return newErrors
-}
-
-  function submitForm(event: FormEvent<HTMLFormElement>) {
-  event.preventDefault()
-
-  const validationErrors = isSupervisor
-    ? validateSupervisor()
-    : validateIntern()
-
-  setErrors(validationErrors)
-
-  if (Object.keys(validationErrors).length > 0) {
-    return
-  }
-
-  navigate(isSupervisor ? '/signup/request' : '/signup/company')
-}
   function clearError(field: string) {
     if (errors[field]) {
       setErrors((current) => {
         const next = { ...current }
+
         delete next[field]
+
         return next
       })
     }
   }
 
-  function handleProfileImage(event: React.ChangeEvent<HTMLInputElement>) {
+  // ==========================================
+  // PHOTO PROFIL
+  // ==========================================
+
+  function handleProfileImage(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const file = event.target.files?.[0]
 
     if (!file) {
@@ -250,36 +324,54 @@ export default function SignupInformationPage({
     if (!file.type.startsWith('image/')) {
       setErrors((current) => ({
         ...current,
-        profil_image: 'Veuillez sélectionner une image valide.',
+        profil_image:
+          'Veuillez sélectionner une image valide.',
       }))
+
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
       setErrors((current) => ({
         ...current,
-        profil_image: "L'image ne doit pas dépasser 5 Mo.",
+        profil_image:
+          "L'image ne doit pas dépasser 5 Mo.",
       }))
+
       return
     }
 
-    updateDraft({ profil_image: file })
+    updateDraft({
+      profil_image: file,
+    })
+
     clearError('profil_image')
   }
 
   function removeProfileImage() {
-    updateDraft({ profil_image: null })
+    updateDraft({
+      profil_image: null,
+    })
   }
 
-  function handleConvention(event: React.ChangeEvent<HTMLInputElement>) {
+  // ==========================================
+  // CONVENTION
+  // ==========================================
+
+  function handleConvention(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const file = event.target.files?.[0]
 
     if (!file) {
       return
     }
 
-    const isPdf = file.type === 'application/pdf'
-    const isImage = file.type.startsWith('image/')
+    const isPdf =
+      file.type === 'application/pdf'
+
+    const isImage =
+      file.type.startsWith('image/')
 
     if (!isPdf && !isImage) {
       setErrors((current) => ({
@@ -287,6 +379,7 @@ export default function SignupInformationPage({
         convention_file:
           'Veuillez sélectionner un fichier PDF ou une image.',
       }))
+
       return
     }
 
@@ -296,16 +389,26 @@ export default function SignupInformationPage({
         convention_file:
           'La convention ne doit pas dépasser 10 Mo.',
       }))
+
       return
     }
 
-    updateDraft({ convention_file: file })
+    updateDraft({
+      convention_file: file,
+    })
+
     clearError('convention_file')
   }
 
   function removeConvention() {
-    updateDraft({ convention_file: null })
+    updateDraft({
+      convention_file: null,
+    })
   }
+
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   return (
     <main className="min-h-screen soft-grid-background text-foreground">
@@ -313,7 +416,11 @@ export default function SignupInformationPage({
 
       <section className="mx-auto max-w-[1120px] px-6 py-9">
         <StepIndicator
-          steps={isSupervisor ? supervisorSteps : internSteps}
+          steps={
+            isSupervisor
+              ? supervisorSteps
+              : internSteps
+          }
           currentStep={2}
         />
 
@@ -322,6 +429,8 @@ export default function SignupInformationPage({
           className="mt-7 rounded-3xl border bg-card p-8 shadow-retool-md sm:p-10"
           noValidate
         >
+          {/* HEADER */}
+
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="text-2xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">
@@ -339,24 +448,32 @@ export default function SignupInformationPage({
 
             {!isSupervisor ? (
               <div className="flex rounded-2xl border bg-background p-1">
-                {(['PFE', 'PFC'] as InternType[]).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => updateDraft({ internType: type })}
-                    className={cn(
-                      'rounded-xl px-5 py-2 text-sm font-bold transition-colors',
-                      draft.internType === type
-                        ? 'bg-[rgb(var(--intern-navy))] text-white'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {type}
-                  </button>
-                ))}
+                {(['PFE', 'PFC'] as InternType[]).map(
+                  (type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() =>
+                        updateDraft({
+                          internType: type,
+                        })
+                      }
+                      className={cn(
+                        'rounded-xl px-5 py-2 text-sm font-bold transition-colors',
+                        draft.internType === type
+                          ? 'bg-[rgb(var(--intern-navy))] text-white'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {type}
+                    </button>
+                  ),
+                )}
               </div>
             ) : null}
           </div>
+
+          {/* FORMULAIRE */}
 
           {isSupervisor ? (
             <SupervisorFields
@@ -365,7 +482,9 @@ export default function SignupInformationPage({
               onChange={updateDraft}
               onClearError={clearError}
               onProfileImage={handleProfileImage}
-              onRemoveProfileImage={removeProfileImage}
+              onRemoveProfileImage={
+                removeProfileImage
+              }
               profilePreview={profilePreview}
             />
           ) : (
@@ -375,13 +494,19 @@ export default function SignupInformationPage({
               onChange={updateDraft}
               onClearError={clearError}
               onProfileImage={handleProfileImage}
-              onRemoveProfileImage={removeProfileImage}
+              onRemoveProfileImage={
+                removeProfileImage
+              }
               profilePreview={profilePreview}
               conventionName={conventionName}
               onConvention={handleConvention}
-              onRemoveConvention={removeConvention}
+              onRemoveConvention={
+                removeConvention
+              }
             />
           )}
+
+          {/* ERREURS */}
 
           {Object.keys(errors).length > 0 && (
             <div className="mt-7 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -391,20 +516,25 @@ export default function SignupInformationPage({
                 <p className="font-bold">
                   Veuillez corriger les champs obligatoires.
                 </p>
+
                 <p className="mt-1">
-                  Vous ne pouvez pas continuer tant que les erreurs ne sont
-                  pas corrigées.
+                  Vous ne pouvez pas continuer tant que
+                  les erreurs ne sont pas corrigées.
                 </p>
               </div>
             </div>
           )}
+
+          {/* BOUTONS */}
 
           <div className="mt-9 flex items-center justify-between gap-4">
             <Button
               type="button"
               variant="outline"
               className="rounded-xl"
-              onClick={() => navigate('/signup')}
+              onClick={() =>
+                navigate('/signup')
+              }
             >
               <ArrowLeft className="h-4 w-4" />
               Retour
@@ -415,6 +545,7 @@ export default function SignupInformationPage({
               className="rounded-xl bg-[rgb(var(--intern-navy))] text-white hover:bg-[rgb(var(--intern-navy-deep))]"
             >
               Continuer
+
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -424,15 +555,27 @@ export default function SignupInformationPage({
   )
 }
 
+// ======================================================
+// PROPS COMMUNES
+// ======================================================
+
 type FieldsProps = {
   draft: SignupDraft
   errors: Errors
-  onChange: (changes: Partial<SignupDraft>) => void
+  onChange: (
+    changes: Partial<SignupDraft>,
+  ) => void
   onClearError: (field: string) => void
-  onProfileImage: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onProfileImage: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => void
   onRemoveProfileImage: () => void
   profilePreview: string | null
 }
+
+// ======================================================
+// FORMULAIRE STAGIAIRE
+// ======================================================
 
 function InternFields({
   draft,
@@ -447,17 +590,29 @@ function InternFields({
   onRemoveConvention,
 }: FieldsProps & {
   conventionName: string
-  onConvention: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onConvention: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => void
   onRemoveConvention: () => void
 }) {
   return (
     <div className="grid gap-x-4 gap-y-5 md:grid-cols-2">
-      <Field label="Nom complet" htmlFor="name" error={errors.name}>
+
+      {/* NOM */}
+
+      <Field
+        label="Nom complet"
+        htmlFor="name"
+        error={errors.name}
+      >
         <Input
           id="name"
           value={draft.name}
           onChange={(e) => {
-            onChange({ name: e.target.value })
+            onChange({
+              name: e.target.value,
+            })
+
             onClearError('name')
           }}
           placeholder="Imane Tazi"
@@ -465,32 +620,52 @@ function InternFields({
         />
       </Field>
 
-      <Field label="E-mail" htmlFor="email" error={errors.email}>
+      {/* EMAIL */}
+
+      <Field
+        label="E-mail"
+        htmlFor="email"
+        error={errors.email}
+      >
         <Input
           id="email"
           type="email"
           value={draft.email}
           onChange={(e) => {
-            onChange({ email: e.target.value })
+            onChange({
+              email: e.target.value,
+            })
+
             onClearError('email')
           }}
-          placeholder="prenom.nom@universite.ma"
+          placeholder="prenom.nom@universite.dz"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
 
-      <Field label="Téléphone" htmlFor="phone" error={errors.phone}>
+      {/* TELEPHONE */}
+
+      <Field
+        label="Téléphone"
+        htmlFor="phone"
+        error={errors.phone}
+      >
         <Input
           id="phone"
           value={draft.phone}
           onChange={(e) => {
-            onChange({ phone: e.target.value })
+            onChange({
+              phone: e.target.value,
+            })
+
             onClearError('phone')
           }}
           placeholder="+213 5 00 00 00 00"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* ETABLISSEMENT */}
 
       <Field
         label="Établissement universitaire"
@@ -501,13 +676,18 @@ function InternFields({
           id="establishment"
           value={draft.establishment}
           onChange={(e) => {
-            onChange({ establishment: e.target.value })
+            onChange({
+              establishment: e.target.value,
+            })
+
             onClearError('establishment')
           }}
           placeholder="USTHB"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* NIVEAU */}
 
       <Field
         label="Niveau d'études"
@@ -517,7 +697,10 @@ function InternFields({
         <Select
           value={draft.studies_level}
           onValueChange={(value) => {
-            onChange({ studies_level: value })
+            onChange({
+              studies_level: value,
+            })
+
             onClearError('studies_level')
           }}
         >
@@ -532,9 +715,11 @@ function InternFields({
             <SelectItem value="bac3">
               Bac+3 — Licence
             </SelectItem>
+
             <SelectItem value="bac5">
               Bac+5 — Ingénierie / Master
             </SelectItem>
+
             <SelectItem value="doctorat">
               Doctorat
             </SelectItem>
@@ -542,28 +727,45 @@ function InternFields({
         </Select>
       </Field>
 
+      {/* SECTEUR */}
+
       <Field
-  label="Secteur du stage"
-  htmlFor="sector"
-  error={errors.sector}
->
-  <Select
-    value={draft.sector}
-    onValueChange={(value) => {
-      onChange({ sector: value })
-      onClearError('sector')
-    }}
-  >
-    <SelectTrigger id="sector" className="h-10 rounded-xl shadow-sm">
-      <SelectValue placeholder="Choisir un secteur" />
-    </SelectTrigger>
-    <SelectContent>
-      {departments.map((dept) => (
-        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</Field>
+        label="Secteur du stage"
+        htmlFor="sector"
+        error={errors.sector}
+      >
+        <Select
+          value={draft.sector}
+          onValueChange={(value) => {
+            onChange({
+              sector: value,
+            })
+
+            onClearError('sector')
+          }}
+        >
+          <SelectTrigger
+            id="sector"
+            className="h-10 rounded-xl shadow-sm"
+          >
+            <SelectValue placeholder="Choisir un secteur" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {departments.map((dept) => (
+              <SelectItem
+                key={dept}
+                value={dept}
+              >
+                {dept}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
+      {/* MOT DE PASSE */}
+
       <Field
         label="Mot de passe"
         htmlFor="password"
@@ -574,13 +776,35 @@ function InternFields({
           type="password"
           value={draft.password}
           onChange={(e) => {
-            onChange({ password: e.target.value })
+            onChange({
+              password: e.target.value,
+            })
+
             onClearError('password')
           }}
           placeholder="••••••••"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+      <Field
+  label="Confirmer le mot de passe"
+  htmlFor="confirmPassword"
+  error={errors.confirmPassword}
+>
+  <Input
+    id="confirmPassword"
+    type="password"
+    value={draft.confirmPassword}
+    onChange={(e) => {
+      onChange({ confirmPassword: e.target.value })
+      onClearError('confirmPassword')
+    }}
+    placeholder="••••••••"
+    className="h-10 rounded-xl shadow-sm"
+  />
+</Field>
+
+      {/* DATE DEBUT */}
 
       <Field
         label="Date de début"
@@ -592,13 +816,18 @@ function InternFields({
           type="date"
           value={draft.start_date}
           onChange={(e) => {
-            onChange({ start_date: e.target.value })
+            onChange({
+              start_date: e.target.value,
+            })
+
             onClearError('start_date')
             onClearError('end_date')
           }}
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* DATE FIN */}
 
       <Field
         label="Date de fin"
@@ -610,12 +839,17 @@ function InternFields({
           type="date"
           value={draft.end_date}
           onChange={(e) => {
-            onChange({ end_date: e.target.value })
+            onChange({
+              end_date: e.target.value,
+            })
+
             onClearError('end_date')
           }}
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* PHOTO */}
 
       <ProfileImageField
         error={errors.profil_image}
@@ -625,23 +859,7 @@ function InternFields({
         onRemove={onRemoveProfileImage}
       />
 
-      <Field
-        label="Mot de passe"
-        htmlFor="password"
-        error={errors.password}
-      >
-        <Input
-          id="password"
-          type="password"
-          value={draft.password}
-          onChange={(e) => {
-            onChange({ password: e.target.value })
-            onClearError('password')
-          }}
-          placeholder="••••••••"
-          className="h-10 rounded-xl shadow-sm"
-        />
-      </Field>
+      {/* SUJET MEMOIRE */}
 
       <Field
         label="Sujet envisagé du mémoire"
@@ -653,13 +871,18 @@ function InternFields({
           id="memoire"
           value={draft.memoire}
           onChange={(e) => {
-            onChange({ memoire: e.target.value })
+            onChange({
+              memoire: e.target.value,
+            })
+
             onClearError('memoire')
           }}
           placeholder="Détection d'anomalies réseau par apprentissage profond..."
           className="min-h-[100px] rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* CONVENTION */}
 
       <ConventionField
         error={errors.convention_file}
@@ -670,6 +893,10 @@ function InternFields({
     </div>
   )
 }
+
+// ======================================================
+// FORMULAIRE ENCADRANT
+// ======================================================
 
 function SupervisorFields({
   draft,
@@ -682,6 +909,9 @@ function SupervisorFields({
 }: FieldsProps) {
   return (
     <div className="grid gap-x-4 gap-y-5 md:grid-cols-2">
+
+      {/* NOM */}
+
       <Field
         label="Nom complet"
         htmlFor="supervisor_name"
@@ -691,13 +921,18 @@ function SupervisorFields({
           id="supervisor_name"
           value={draft.name}
           onChange={(e) => {
-            onChange({ name: e.target.value })
+            onChange({
+              name: e.target.value,
+            })
+
             onClearError('name')
           }}
           placeholder="Karim Bennani"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* EMAIL */}
 
       <Field
         label="E-mail professionnel"
@@ -709,13 +944,18 @@ function SupervisorFields({
           type="email"
           value={draft.email}
           onChange={(e) => {
-            onChange({ email: e.target.value })
+            onChange({
+              email: e.target.value,
+            })
+
             onClearError('email')
           }}
           placeholder="nom@entreprise.com"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* TELEPHONE */}
 
       <Field
         label="Téléphone"
@@ -726,7 +966,10 @@ function SupervisorFields({
           id="supervisor_phone"
           value={draft.phone}
           onChange={(e) => {
-            onChange({ phone: e.target.value })
+            onChange({
+              phone: e.target.value,
+            })
+
             onClearError('phone')
           }}
           placeholder="+213 5 00 00 00 00"
@@ -734,28 +977,35 @@ function SupervisorFields({
         />
       </Field>
 
-    <Field
-  label="ID de l'encadrant"
-  htmlFor="supervisor_id"
-  error={errors.supervisor_id}
->
-  <Input
-    id="supervisor_id"
-    name="supervisor_id"
-    type="text"
-    value={draft.supervisor_id}
-    onChange={(event) => {
-      onChange({
-        supervisor_id: event.target.value,
-      })
-      onClearError('supervisor_id')
-    }}
-    placeholder="Ex. ENC-001"
-    className="h-10 rounded-xl shadow-sm"
-    autoComplete="off"
-  />
-</Field>
-<Field
+      {/* ID ENCADRANT */}
+
+      <Field
+        label="ID de l'encadrant"
+        htmlFor="supervisor_id"
+        error={errors.supervisor_id}
+      >
+        <Input
+          id="supervisor_id"
+          name="supervisor_id"
+          type="text"
+          value={draft.supervisor_id}
+          onChange={(event) => {
+            onChange({
+              supervisor_id:
+                event.target.value,
+            })
+
+            onClearError('supervisor_id')
+          }}
+          placeholder="Ex. ENC-001"
+          className="h-10 rounded-xl shadow-sm"
+          autoComplete="off"
+        />
+      </Field>
+
+      {/* MOT DE PASSE */}
+
+      <Field
         label="Mot de passe"
         htmlFor="supervisor_password"
         error={errors.password}
@@ -765,7 +1015,10 @@ function SupervisorFields({
           type="password"
           value={draft.password}
           onChange={(e) => {
-            onChange({ password: e.target.value })
+            onChange({
+              password: e.target.value,
+            })
+
             onClearError('password')
           }}
           placeholder="••••••••"
@@ -773,12 +1026,21 @@ function SupervisorFields({
         />
       </Field>
 
-      <Field label="Poste" htmlFor="job" error={errors.job}>
+      {/* POSTE */}
+
+      <Field
+        label="Poste"
+        htmlFor="job"
+        error={errors.job}
+      >
         <Input
           id="job"
           value={draft.job}
           onChange={(e) => {
-            onChange({ job: e.target.value })
+            onChange({
+              job: e.target.value,
+            })
+
             onClearError('job')
           }}
           placeholder="Architecte réseau senior"
@@ -786,28 +1048,45 @@ function SupervisorFields({
         />
       </Field>
 
+      {/* DEPARTEMENT */}
+
       <Field
-  label="Département"
-  htmlFor="department"
-  error={errors.department}
->
-  <Select
-    value={draft.department}
-    onValueChange={(value) => {
-      onChange({ department: value })
-      onClearError('department')
-    }}
-  >
-    <SelectTrigger id="department" className="h-10 rounded-xl shadow-sm">
-      <SelectValue placeholder="Choisir un département" />
-    </SelectTrigger>
-    <SelectContent>
-      {departments.map((dept) => (
-        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</Field>
+        label="Département"
+        htmlFor="department"
+        error={errors.department}
+      >
+        <Select
+          value={draft.department}
+          onValueChange={(value) => {
+            onChange({
+              department: value,
+            })
+
+            onClearError('department')
+          }}
+        >
+          <SelectTrigger
+            id="department"
+            className="h-10 rounded-xl shadow-sm"
+          >
+            <SelectValue placeholder="Choisir un département" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {departments.map((dept) => (
+              <SelectItem
+                key={dept}
+                value={dept}
+              >
+                {dept}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+
+      {/* SPECIALISATION */}
+
       <Field
         label="Spécialisation"
         htmlFor="specialization"
@@ -817,13 +1096,19 @@ function SupervisorFields({
           id="specialization"
           value={draft.specialization}
           onChange={(e) => {
-            onChange({ specialization: e.target.value })
+            onChange({
+              specialization:
+                e.target.value,
+            })
+
             onClearError('specialization')
           }}
           placeholder="Réseaux & Cloud hybride"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* EXPERIENCE */}
 
       <Field
         label="Années d'expérience"
@@ -836,13 +1121,21 @@ function SupervisorFields({
           min="0"
           value={draft.years_of_experience}
           onChange={(e) => {
-            onChange({ years_of_experience: e.target.value })
-            onClearError('years_of_experience')
+            onChange({
+              years_of_experience:
+                e.target.value,
+            })
+
+            onClearError(
+              'years_of_experience',
+            )
           }}
           placeholder="12"
           className="h-10 rounded-xl shadow-sm"
         />
       </Field>
+
+      {/* PHOTO */}
 
       <ProfileImageField
         error={errors.profil_image}
@@ -851,11 +1144,13 @@ function SupervisorFields({
         onChange={onProfileImage}
         onRemove={onRemoveProfileImage}
       />
-
-      
     </div>
   )
 }
+
+// ======================================================
+// PHOTO DE PROFIL
+// ======================================================
 
 function ProfileImageField({
   error,
@@ -867,13 +1162,17 @@ function ProfileImageField({
   error?: string
   preview: string | null
   fileName?: string
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onChange: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => void
   onRemove: () => void
 }) {
   return (
     <div className="md:col-span-2">
+
       <p className="mb-2 text-sm font-semibold text-foreground">
-        Photo de profil <span className="text-red-500">*</span>
+        Photo de profil{' '}
+        <span className="text-red-500">*</span>
       </p>
 
       <div
@@ -883,6 +1182,7 @@ function ProfileImageField({
         )}
       >
         <div className="flex flex-col items-center justify-center text-center">
+
           {preview ? (
             <div className="relative">
               <img
@@ -907,11 +1207,14 @@ function ProfileImageField({
           )}
 
           <p className="mt-4 font-bold text-[rgb(var(--intern-navy))] dark:text-foreground">
-            {preview ? 'Photo sélectionnée' : 'Photo du profil'}
+            {preview
+              ? 'Photo sélectionnée'
+              : 'Photo du profil'}
           </p>
 
           <p className="mt-1 text-xs text-muted-foreground">
-            {fileName || 'PNG, JPG ou WEBP — 5 Mo maximum'}
+            {fileName ||
+              'PNG, JPG ou WEBP — 5 Mo maximum'}
           </p>
 
           <label
@@ -919,7 +1222,10 @@ function ProfileImageField({
             className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl border bg-background px-4 py-2 text-sm font-bold transition-colors hover:bg-muted"
           >
             <Camera className="h-4 w-4" />
-            {preview ? 'Changer la photo' : 'Choisir une image'}
+
+            {preview
+              ? 'Changer la photo'
+              : 'Choisir une image'}
           </label>
 
           <input
@@ -932,10 +1238,18 @@ function ProfileImageField({
         </div>
       </div>
 
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {error}
+        </ErrorMessage>
+      )}
     </div>
   )
 }
+
+// ======================================================
+// CONVENTION
+// ======================================================
 
 function ConventionField({
   error,
@@ -945,13 +1259,17 @@ function ConventionField({
 }: {
   error?: string
   fileName: string
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onChange: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => void
   onRemove: () => void
 }) {
   return (
     <div className="md:col-span-2">
+
       <p className="mb-2 text-sm font-semibold text-foreground">
-        Convention de stage <span className="text-red-500">*</span>
+        Convention de stage{' '}
+        <span className="text-red-500">*</span>
       </p>
 
       <div
@@ -971,6 +1289,7 @@ function ConventionField({
             </p>
 
             <div className="mt-4 flex gap-2">
+
               <label
                 htmlFor="convention_file"
                 className="inline-flex cursor-pointer items-center gap-2 rounded-xl border bg-background px-4 py-2 text-sm font-bold hover:bg-muted"
@@ -1021,10 +1340,18 @@ function ConventionField({
         />
       </div>
 
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {error}
+        </ErrorMessage>
+      )}
     </div>
   )
 }
+
+// ======================================================
+// CHAMP GÉNÉRIQUE
+// ======================================================
 
 function Field({
   children,
@@ -1041,21 +1368,35 @@ function Field({
 }) {
   return (
     <div className={className}>
+
       <label
         className="mb-2 block text-sm font-semibold text-foreground"
         htmlFor={htmlFor}
       >
-        {label} <span className="text-red-500">*</span>
+        {label}{' '}
+        <span className="text-red-500">*</span>
       </label>
 
       {children}
 
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {error && (
+        <ErrorMessage>
+          {error}
+        </ErrorMessage>
+      )}
     </div>
   )
 }
 
-function ErrorMessage({ children }: { children: ReactNode }) {
+// ======================================================
+// MESSAGE ERREUR
+// ======================================================
+
+function ErrorMessage({
+  children,
+}: {
+  children: ReactNode
+}) {
   return (
     <p className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-red-600">
       <X className="h-3.5 w-3.5" />

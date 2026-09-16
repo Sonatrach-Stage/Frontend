@@ -33,7 +33,7 @@ export default function ReportsPage() {
             {validated.map((t) => (
               <tr key={t.id} className="border-b last:border-0">
                 <td className="p-4 font-bold text-foreground">{t.intern}</td>
-                <td className="p-4"><Badge variant="outline" className="rounded-full">{t.type}</Badge></td>
+                <td className="p-4"><Badge variant="outline" className="rounded-full">{t.kind}</Badge></td>
                 <td className="p-4 text-muted-foreground">{t.title}</td>
                 <td className="p-4 text-muted-foreground">{t.version}</td>
                 <td className="p-4 text-muted-foreground">{t.date}</td>
