@@ -1,11 +1,31 @@
-import { Search } from 'lucide-react'
+import { useState } from 'react'
+import { Search, Trash2 } from 'lucide-react'
 import { Badge } from '../../../lib/shadcn/badge'
 import { Button } from '../../../lib/shadcn/button'
 import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
-import { companies } from '../../data/internPilotData'
+import { companies as initialCompanies } from '../../data/internPilotData'
+import { deleteCompany } from '../../../api/companies'
 
 export default function CompaniesPage() {
+  const [companies, setCompanies] = useState(initialCompanies)
+  const [error, setError] = useState('')
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+
+  async function handleDelete(id: number) {
+    if (!confirm('Supprimer cette entreprise ? Cette action est irréversible.')) return
+    setDeletingId(id)
+    setError('')
+    try {
+      await deleteCompany(id)
+      setCompanies((current) => current.filter((c) => c.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <>
       <div className="mb-7">
@@ -18,12 +38,13 @@ export default function CompaniesPage() {
         <Input placeholder="Rechercher une entreprise..." className="h-10 rounded-2xl pl-11 shadow-sm" />
       </div>
 
+      {error && <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
+
       <Card className="overflow-x-auto rounded-3xl p-2 shadow-retool-sm">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
               <th className="p-4">Nom</th>
-              <th className="p-4">Responsable</th>
               <th className="p-4">Email</th>
               <th className="p-4">Stagiaires</th>
               <th className="p-4">Encadrants</th>
@@ -35,7 +56,6 @@ export default function CompaniesPage() {
             {companies.map((company) => (
               <tr key={company.id} className="border-b last:border-0">
                 <td className="p-4 font-bold text-foreground">{company.name}</td>
-                <td className="p-4 text-muted-foreground">—</td>
                 <td className="p-4 text-muted-foreground">{company.company_email}</td>
                 <td className="p-4 text-muted-foreground">{company.interns_count}</td>
                 <td className="p-4 text-muted-foreground">{company.supervisors_count}</td>
@@ -45,7 +65,15 @@ export default function CompaniesPage() {
                 <td className="p-4">
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" className="rounded-lg">Voir</Button>
-                    <Button size="sm" variant="outline" className="rounded-lg">Désactiver</Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={deletingId === company.id}
+                      className="rounded-lg text-red-600"
+                      onClick={() => handleDelete(company.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </td>
               </tr>

@@ -9,7 +9,7 @@ export default function CompanyPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Entreprise</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Informations de la société — distinctes de votre profil personnel.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <Card className="max-w-2xl rounded-3xl p-8 shadow-retool-sm">

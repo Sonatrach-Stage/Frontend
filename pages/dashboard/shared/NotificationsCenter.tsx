@@ -10,7 +10,7 @@ export function NotificationsCenter({ notifications }: { notifications: Notifica
       <div className="mb-7 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Notifications</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Toutes vos notifications récentes.</p>
+          <p className="mt-2 text-sm text-muted-foreground"></p>
         </div>
         <Button variant="outline" size="sm" className="rounded-lg">
           <Check className="h-3.5 w-3.5" />

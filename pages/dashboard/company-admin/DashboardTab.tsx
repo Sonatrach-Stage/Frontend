@@ -9,7 +9,7 @@ export default function DashboardTab() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Tableau de bord</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Statistiques détaillées de votre entreprise.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

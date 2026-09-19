@@ -8,7 +8,7 @@ export default function AssignmentsPage() {
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Mes affectations</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          L'affectation est faite par l'administrateur de l'entreprise — vous ne pouvez pas choisir vos stagiaires.
+         
         </p>
       </div>
 

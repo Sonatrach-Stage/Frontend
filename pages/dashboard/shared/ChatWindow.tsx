@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Paperclip, Send } from 'lucide-react'
+import { Paperclip, Send, Trash2 } from 'lucide-react'
 import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
 import { cn } from '../../../lib/shadcn/utils'
+import { deleteMessage } from '../../../api/messages'
 import type { ChatMessage } from '../../data/dashboardMockData'
 
 export function ChatWindow({
@@ -24,9 +25,19 @@ export function ChatWindow({
     if (!draft.trim()) return
     setMessages((current) => [
       ...current,
-      { id: current.length + 1, sender: currentRole, text: draft.trim(), time: 'À l\'instant' },
+      { id: current.length + 1, sender: currentRole, text: draft.trim(), time: "À l'instant" },
     ])
     setDraft('')
+  }
+
+  async function handleDeleteMessage(messageId: number) {
+    if (!confirm('Supprimer ce message ?')) return
+    try {
+      await deleteMessage(messageId)
+      setMessages((current) => current.filter((m) => m.id !== messageId))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erreur lors de la suppression du message')
+    }
   }
 
   return (
@@ -43,7 +54,17 @@ export function ChatWindow({
 
       <div className="flex-1 space-y-3 overflow-y-auto p-5">
         {messages.map((msg) => (
-          <div key={msg.id} className={cn('flex', msg.sender === currentRole ? 'justify-end' : 'justify-start')}>
+          <div key={msg.id} className={cn('group flex items-center gap-2', msg.sender === currentRole ? 'justify-end' : 'justify-start')}>
+            {msg.sender === currentRole && (
+              <button
+                type="button"
+                onClick={() => handleDeleteMessage(msg.id)}
+                className="opacity-0 transition-opacity group-hover:opacity-100"
+                aria-label="Supprimer le message"
+              >
+                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-600" />
+              </button>
+            )}
             <div
               className={cn(
                 'max-w-[70%] rounded-2xl px-4 py-2.5 text-sm',

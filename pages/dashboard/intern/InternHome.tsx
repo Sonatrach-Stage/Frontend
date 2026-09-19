@@ -13,9 +13,9 @@ export default function InternHome() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">
-          Bonjour {user?.name?.split(' ')[0] ?? ''} 👋
+          Bonjour {user?.name?.split(' ')[0] ?? ''} 
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">Voici un aperçu de votre stage.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <Card className="rounded-3xl p-6 shadow-retool-sm">

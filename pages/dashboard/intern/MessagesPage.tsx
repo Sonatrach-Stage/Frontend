@@ -7,7 +7,7 @@ export default function MessagesPage() {
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Messages</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Vous pouvez discuter uniquement avec votre encadrant affecté.
+         
         </p>
       </div>
 

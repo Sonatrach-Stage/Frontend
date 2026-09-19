@@ -25,7 +25,7 @@ export default function DocumentsPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Documents</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Bibliothèque personnelle des documents de vos stagiaires.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="mb-5 flex flex-wrap gap-2">

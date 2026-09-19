@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LogOut, Settings, User as UserIcon } from 'lucide-react'
-import { clearCurrentUser } from '../../../lib/auth'
+import { clearCurrentUser, getRefreshToken } from '../../../lib/auth'
+import { logout } from '../../../api/auth'
 import type { CurrentUser } from '../../../lib/auth'
 
 export function UserMenu({ user, roleLabel, basePath }: { user: CurrentUser; roleLabel: string; basePath: string }) {
@@ -19,7 +20,15 @@ export function UserMenu({ user, roleLabel, basePath }: { user: CurrentUser; rol
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  function handleLogout() {
+  async function handleLogout() {
+    const refreshToken = getRefreshToken()
+    if (refreshToken) {
+      try {
+        await logout(refreshToken)
+      } catch {
+        // même si l'appel échoue côté serveur, on déconnecte localement
+      }
+    }
     clearCurrentUser()
     navigate('/')
   }

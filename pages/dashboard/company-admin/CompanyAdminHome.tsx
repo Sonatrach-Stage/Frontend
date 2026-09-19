@@ -20,9 +20,9 @@ export default function CompanyAdminHome() {
     <>
       <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Bonjour {user?.name?.split(' ')[0] ?? 'Ahmed'} 👋</h1>
+          <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Bonjour {user?.name?.split(' ')[0] ?? 'Ahmed'} </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Bienvenue dans l'espace d'administration de {user?.companyName ?? 'votre entreprise'}.
+            {user?.companyName ?? ''}
           </p>
         </div>
         <div className="flex gap-2">

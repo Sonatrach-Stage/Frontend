@@ -36,7 +36,7 @@ export default function CalendarPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Calendrier</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Réunions, échéances et rendez-vous avec vos stagiaires.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <Card className="mb-6 rounded-3xl p-6 shadow-retool-sm">

@@ -39,7 +39,7 @@ export default function MyReportPage() {
           {isPFE ? 'Mon mémoire (PFE)' : 'Mon rapport (PFC)'}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Déposez votre document, il sera transmis à votre encadrant pour validation.
+         
         </p>
       </div>
 

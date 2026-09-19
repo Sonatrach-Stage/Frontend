@@ -46,7 +46,10 @@ export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_TOKEN_KEY)
 }
 
-// Convertit le rôle renvoyé par le backend vers le type Role du frontend
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_TOKEN_KEY)
+}
+
 export function mapBackendRole(backendRole: string): Role {
   const normalized = backendRole.toUpperCase().trim()
 

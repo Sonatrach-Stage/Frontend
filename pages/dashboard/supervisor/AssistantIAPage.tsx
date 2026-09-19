@@ -32,7 +32,7 @@ export default function AssistantIAPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Assistant IA</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Résumez, analysez et évaluez les documents de vos stagiaires.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">

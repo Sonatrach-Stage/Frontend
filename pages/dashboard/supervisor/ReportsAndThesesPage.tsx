@@ -39,7 +39,7 @@ export default function ReportsAndThesesPage() {
         <div>
           <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Rapports et mémoires</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Les rapports correspondent aux PFC, les mémoires aux PFE. Un document validé devient visible par tous.
+           
           </p>
         </div>
         <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowAllCompanies((v) => !v)}>

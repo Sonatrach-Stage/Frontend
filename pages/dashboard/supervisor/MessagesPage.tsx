@@ -12,7 +12,7 @@ export default function MessagesPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Messages</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Discutez avec vos stagiaires affectés.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">

@@ -21,6 +21,8 @@ import SignupRequestPage from './pages/SignupRequestPage'
 import AdminSignupPage from './pages/AdminSignupPage'
 import RequestPendingPage from './pages/RequestPendingPage'
 import DashboardEntry from './pages/DashboardEntry'
+import VerifyOtpPage from './pages/VerifyOtpPage'
+import ForgotPasswordFlowPage from './pages/ForgotPasswordFlowPage'
 
 import type { SignupDraft } from './pages/data/internPilotData'
 
@@ -28,6 +30,7 @@ import { DashboardLayout } from './pages/dashboard/DashboardLayout'
 import { PlaceholderPage } from './pages/dashboard/PlaceholderPage'
 import { companyAdminNav, internNav, supervisorNav, superAdminNav } from './pages/dashboard/navConfig'
 import { getCurrentUser } from './lib/auth'
+import type { CurrentUser } from './lib/auth'
 
 // Company Admin
 import CompanyAdminHome from './pages/dashboard/company-admin/CompanyAdminHome'
@@ -35,7 +38,7 @@ import CompanyAdminDashboardTab from './pages/dashboard/company-admin/DashboardT
 import ValidationsPage from './pages/dashboard/company-admin/ValidationsPage'
 import InternsPage from './pages/dashboard/company-admin/InternsPage'
 import AssignmentsPage from './pages/dashboard/company-admin/AssignmentsPage'
-
+import EncadrantsPage from './pages/dashboard/company-admin/EncadrantsPage'
 import CompanyAdminReportsPage from './pages/dashboard/company-admin/ReportsPage'
 import CompanyAdminAssistantIAPage from './pages/dashboard/company-admin/AssistantIAPage'
 import CompanyAdminNotificationsPage from './pages/dashboard/company-admin/NotificationsPage'
@@ -86,13 +89,16 @@ function RoleLayout({
   basePath,
   navItems,
   roleLabel,
+  expectedRole,
 }: {
   basePath: string
   navItems: typeof companyAdminNav
   roleLabel: string
+  expectedRole: CurrentUser['role']
 }) {
   const user = getCurrentUser()
   if (!user) return <Navigate to="/" replace />
+  if (user.role !== expectedRole) return <Navigate to={`/dashboard/${user.role}`} replace />
   return <DashboardLayout basePath={basePath} navItems={navItems} roleLabel={roleLabel} user={user} />
 }
 
@@ -119,6 +125,7 @@ export default function App() {
     specialization: '',
     years_of_experience: '',
     password: '',
+    confirmPassword: '',
     supervisor_id: '',
   })
 
@@ -130,12 +137,14 @@ export default function App() {
     <Routes>
       {/* AUTH / INSCRIPTION */}
       <Route path="/" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordFlowPage />} />
       <Route path="/signup" element={<SignupRolePage draft={signupDraft} updateDraft={updateSignupDraft} />} />
       <Route path="/signup/information" element={<SignupInformationPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
       <Route path="/signup/company" element={<SignupCompanyPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
       <Route path="/signup/supervisor" element={<SignupSupervisorPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
-      <Route path="/signup/admin" element={<AdminSignupPage />} />
+      <Route path="/signup/admin" element={<AdminSignupPage draft={signupDraft} updateDraft={updateSignupDraft} />} />
       <Route path="/signup/request" element={<SignupRequestPage draft={signupDraft} />} />
+      <Route path="/signup/verify-otp" element={<VerifyOtpPage draft={signupDraft} />} />
       <Route path="/request-pending" element={<RequestPendingPage draft={signupDraft} />} />
 
       {/* ENTRÉE DASHBOARD */}
@@ -144,16 +153,22 @@ export default function App() {
       {/* ADMINISTRATEUR ENTREPRISE */}
       <Route
         path="/dashboard/company-admin"
-        element={<RoleLayout basePath="/dashboard/company-admin" navItems={companyAdminNav} roleLabel="Administrateur entreprise" />}
+        element={
+          <RoleLayout
+            basePath="/dashboard/company-admin"
+            navItems={companyAdminNav}
+            roleLabel="Administrateur entreprise"
+            expectedRole="company-admin"
+          />
+        }
       >
         <Route index element={<CompanyAdminHome />} />
         <Route path="tableau-de-bord" element={<CompanyAdminDashboardTab />} />
         <Route path="validations" element={<ValidationsPage />} />
         <Route path="stagiaires" element={<InternsPage />} />
-        <Route path="encadrants" element={<PlaceholderPage icon={Layers} title="Encadrants" description="Liste des encadrants de votre entreprise." />} />
+        <Route path="encadrants" element={<EncadrantsPage />} />
         <Route path="affectations" element={<AssignmentsPage />} />
-        
-        
+        <Route path="documents" element={<PlaceholderPage icon={FolderOpen} title="Documents" description="Bibliothèque documentaire de l'entreprise." />} />
         <Route path="rapports" element={<CompanyAdminReportsPage />} />
         <Route path="ia" element={<CompanyAdminAssistantIAPage />} />
         <Route path="notifications" element={<CompanyAdminNotificationsPage />} />
@@ -164,7 +179,14 @@ export default function App() {
       {/* STAGIAIRE */}
       <Route
         path="/dashboard/intern"
-        element={<RoleLayout basePath="/dashboard/intern" navItems={internNav} roleLabel="Stagiaire" />}
+        element={
+          <RoleLayout
+            basePath="/dashboard/intern"
+            navItems={internNav}
+            roleLabel="Stagiaire"
+            expectedRole="intern"
+          />
+        }
       >
         <Route index element={<InternHome />} />
         <Route path="tableau-de-bord" element={<InternDashboardTab />} />
@@ -183,7 +205,14 @@ export default function App() {
       {/* ENCADRANT */}
       <Route
         path="/dashboard/supervisor"
-        element={<RoleLayout basePath="/dashboard/supervisor" navItems={supervisorNav} roleLabel="Encadrant" />}
+        element={
+          <RoleLayout
+            basePath="/dashboard/supervisor"
+            navItems={supervisorNav}
+            roleLabel="Encadrant"
+            expectedRole="supervisor"
+          />
+        }
       >
         <Route index element={<SupervisorHome />} />
         <Route path="tableau-de-bord" element={<SupervisorDashboardTab />} />
@@ -203,7 +232,14 @@ export default function App() {
       {/* SUPER ADMINISTRATEUR */}
       <Route
         path="/dashboard/super-admin"
-        element={<RoleLayout basePath="/dashboard/super-admin" navItems={superAdminNav} roleLabel="Super Administrateur" />}
+        element={
+          <RoleLayout
+            basePath="/dashboard/super-admin"
+            navItems={superAdminNav}
+            roleLabel="Super Administrateur"
+            expectedRole="super-admin"
+          />
+        }
       >
         <Route index element={<SuperAdminHome />} />
         <Route path="tableau-de-bord" element={<SuperAdminDashboardTab />} />

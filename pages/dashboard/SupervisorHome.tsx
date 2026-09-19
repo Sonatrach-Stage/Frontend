@@ -31,7 +31,7 @@ export default function SupervisorHome() {
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">
           Bonjour, {user?.name ?? 'Encadrant'} 👋
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">Voici un aperçu de vos stages et de vos stagiaires.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
