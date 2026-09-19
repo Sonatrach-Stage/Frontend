@@ -1,50 +1,91 @@
-import { useState } from 'react'
-import { Badge } from '../../../lib/shadcn/badge'
+import { useEffect, useState } from 'react'
 import { Button } from '../../../lib/shadcn/button'
 import { Card } from '../../../lib/shadcn/card'
-import { cn } from '../../../lib/shadcn/utils'
-import { companyRequests as initial, type CompanyRequest } from '../../data/dashboardMockData'
+import { Badge } from '../../../lib/shadcn/badge'
+import { getPendingCompanies, approveCompany, rejectCompany, type ApiCompany } from '../../../api/adminsup'
 
 export default function RequestsPage() {
-  const [requests, setRequests] = useState<CompanyRequest[]>(initial)
+  const [companies, setCompanies] = useState<ApiCompany[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [busyId, setBusyId] = useState<number | null>(null)
 
-  function accept(id: number) {
-    setRequests((cur) => cur.map((r) => (r.id === id ? { ...r, status: 'Acceptée' } : r)))
+  function loadPending() {
+    setLoading(true)
+    getPendingCompanies()
+      .then((res) => setCompanies(res.companies))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .finally(() => setLoading(false))
   }
-  function refuse(id: number) {
-    setRequests((cur) => cur.map((r) => (r.id === id ? { ...r, status: 'Refusée' } : r)))
+
+  useEffect(() => {
+    loadPending()
+  }, [])
+
+  async function handleApprove(id: number) {
+    setBusyId(id)
+    setError('')
+    try {
+      await approveCompany(id)
+      setCompanies((current) => current.filter((c) => c.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'approbation")
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function handleReject(id: number) {
+    setBusyId(id)
+    setError('')
+    try {
+      await rejectCompany(id)
+      setCompanies((current) => current.filter((c) => c.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du rejet')
+    } finally {
+      setBusyId(null)
+    }
   }
 
   return (
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Demandes</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Demandes d'ouverture d'espace entreprise.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Demandes d'ouverture d'espace entreprise en attente.</p>
       </div>
 
-      <div className="space-y-3">
-        {requests.map((req) => (
-          <Card key={req.id} className="rounded-2xl p-5 shadow-retool-sm">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="font-bold text-foreground">{req.company}</p>
-                <p className="text-sm text-muted-foreground">Responsable : {req.responsible} · {req.date}</p>
-              </div>
-              {req.status === 'En attente' ? (
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="rounded-lg">Voir détails</Button>
-                  <Button size="sm" className="rounded-lg bg-[rgb(var(--intern-navy))] text-white" onClick={() => accept(req.id)}>Accepter</Button>
-                  <Button size="sm" variant="outline" className="rounded-lg text-red-600" onClick={() => refuse(req.id)}>Refuser</Button>
+      {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
+      {error && <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
+
+      {!loading && (
+        <div className="space-y-3">
+          {companies.map((company) => (
+            <Card key={company.id} className="rounded-2xl p-5 shadow-retool-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="font-bold text-foreground">{company.name}</p>
+                  <p className="text-sm text-muted-foreground">{company.company_email}</p>
                 </div>
-              ) : (
-                <Badge className={cn('rounded-full', req.status === 'Acceptée' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100' : 'bg-red-100 text-red-700 hover:bg-red-100')}>
-                  {req.status}
-                </Badge>
-              )}
-            </div>
-          </Card>
-        ))}
-      </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="rounded-full text-amber-600">🟡 {company.company_status}</Badge>
+                  <Button size="sm" disabled={busyId === company.id} className="rounded-lg bg-[rgb(var(--intern-navy))] text-white" onClick={() => handleApprove(company.id)}>
+                    Accepter
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={busyId === company.id} className="rounded-lg text-red-600" onClick={() => handleReject(company.id)}>
+                    Refuser
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+          {companies.length === 0 && (
+            <Card className="rounded-2xl border-dashed p-10 text-center text-sm text-muted-foreground">
+              Aucune demande en attente.
+            </Card>
+          )}
+        </div>
+      )}
     </>
   )
 }

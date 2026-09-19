@@ -4,7 +4,7 @@ import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
 import { cn } from '../../../lib/shadcn/utils'
-import { deleteMessage } from '../../../api/messages'
+import { deleteMessage } from '../../../api/chat'
 import type { ChatMessage } from '../../data/dashboardMockData'
 
 export function ChatWindow({

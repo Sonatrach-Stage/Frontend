@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Building2, Search } from 'lucide-react'
 
@@ -6,10 +6,11 @@ import { Button } from '../lib/shadcn/button'
 import { Card } from '../lib/shadcn/card'
 import { Input } from '../lib/shadcn/input'
 import { cn } from '../lib/shadcn/utils'
-import { companies, type SignupDraft } from './data/internPilotData'
+import type { SignupDraft } from './data/internPilotData'
 import { AuthHeader } from './ui/AuthHeader'
 import { StepIndicator } from './ui/StepIndicator'
 import { registerIntern } from '../api/auth'
+import { getApprovedCompaniesPublic, type PublicCompany } from '../api/companies'
 
 type SignupCompanyPageProps = {
   draft: SignupDraft
@@ -30,7 +31,6 @@ const supervisorSteps = [
   { number: 4, label: 'Validation' },
 ]
 
-// Le backend attend "intern_PFE" / "intern_PFC" (déduit de la description de thesis_subject)
 function mapInternType(type: 'PFE' | 'PFC') {
   return type === 'PFE' ? 'intern_PFE' : 'intern_PFC'
 }
@@ -38,25 +38,28 @@ function mapInternType(type: 'PFE' | 'PFC') {
 export default function SignupCompanyPage({ draft, updateDraft }: SignupCompanyPageProps) {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [companies, setCompanies] = useState<PublicCompany[]>([])
+  const [loadingCompanies, setLoadingCompanies] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [apiError, setApiError] = useState('')
 
   const isSupervisor = draft.role === 'supervisor'
 
-  const filteredCompanies = useMemo(() => {
-    const query = searchTerm.trim().toLowerCase()
-    if (!query) return companies
-    return companies.filter((company) =>
-      `${company.name} ${company.description}`.toLowerCase().includes(query),
-    )
-  }, [searchTerm])
+  useEffect(() => {
+    getApprovedCompaniesPublic()
+      .then((res) => setCompanies(res.companies))
+      .catch((err) => setLoadError(err instanceof Error ? err.message : 'Erreur de chargement des entreprises'))
+      .finally(() => setLoadingCompanies(false))
+  }, [])
+
+  const filteredCompanies = companies.filter((c) => c.name.toLowerCase().includes(searchTerm.trim().toLowerCase()))
 
   const selectedCompany = companies.find((c) => c.id === draft.selectedCompanyId)
 
   async function handleContinue() {
     if (!selectedCompany) return
 
-    // L'inscription encadrant se fait ailleurs (SignupSupervisorPage) — ici on ne gère que le stagiaire
     if (isSupervisor) {
       navigate('/signup/supervisor')
       return
@@ -83,7 +86,6 @@ export default function SignupCompanyPage({ draft, updateDraft }: SignupCompanyP
       if (draft.internType === 'PFE') {
         formData.append('thesis_subject', draft.memoire)
       }
-
       if (draft.profil_image) {
         formData.append('profile_image', draft.profil_image)
       }
@@ -126,43 +128,40 @@ export default function SignupCompanyPage({ draft, updateDraft }: SignupCompanyP
             />
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
-            {filteredCompanies.map((company) => {
-              const selected = draft.selectedCompanyId === company.id
-              return (
-                <button
-                  key={company.id}
-                  type="button"
-                  onClick={() => updateDraft({ selectedCompanyId: company.id })}
-                  className="text-left"
-                >
-                  <div
-                    className={cn(
-                      'flex min-h-[102px] items-start gap-4 rounded-2xl border bg-card p-4 text-left transition-all hover:border-[rgb(var(--intern-blue))] hover:shadow-retool-sm',
-                      selected && 'border-[rgb(var(--intern-blue))] bg-[rgb(var(--intern-soft-blue))] shadow-retool-sm',
-                    )}
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--intern-navy))] text-white">
-                      <Building2 className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{company.name}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{company.description}</p>
-                      <p className="mt-4 text-xs text-muted-foreground">
-                        {company.supervisors_count} encadrants · {company.interns_count} stagiaires
-                      </p>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+          {loadingCompanies && <p className="mt-5 text-sm text-muted-foreground">Chargement des entreprises...</p>}
+          {loadError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{loadError}</p>}
 
-          {filteredCompanies.length === 0 && (
+          {!loadingCompanies && !loadError && (
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              {filteredCompanies.map((company) => {
+                const selected = draft.selectedCompanyId === company.id
+                return (
+                  <button key={company.id} type="button" onClick={() => updateDraft({ selectedCompanyId: company.id })} className="text-left">
+                    <div
+                      className={cn(
+                        'flex min-h-[80px] items-center gap-4 rounded-2xl border bg-card p-4 text-left transition-all hover:border-[rgb(var(--intern-blue))] hover:shadow-retool-sm',
+                        selected && 'border-[rgb(var(--intern-blue))] bg-[rgb(var(--intern-soft-blue))] shadow-retool-sm',
+                      )}
+                    >
+                      {company.logo ? (
+                        <img src={company.logo} alt={company.name} className="h-10 w-10 rounded-xl object-cover" />
+                      ) : (
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--intern-navy))] text-white">
+                          <Building2 className="h-5 w-5" />
+                        </div>
+                      )}
+                      <p className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{company.name}</p>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {!loadingCompanies && !loadError && filteredCompanies.length === 0 && (
             <div className="mt-5 rounded-2xl border border-dashed p-8 text-center">
               <Building2 className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-3 font-semibold">Aucune entreprise trouvée</p>
-              <p className="mt-1 text-sm text-muted-foreground">Essayez avec un autre nom d'entreprise.</p>
             </div>
           )}
 
@@ -173,16 +172,13 @@ export default function SignupCompanyPage({ draft, updateDraft }: SignupCompanyP
             </div>
           )}
 
-          {apiError && (
-            <p className="mt-5 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{apiError}</p>
-          )}
+          {apiError && <p className="mt-5 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{apiError}</p>}
 
           <div className="mt-8 flex items-center justify-between gap-4">
             <Button type="button" variant="outline" className="rounded-xl" onClick={() => navigate('/signup/information')}>
               <ArrowLeft className="h-4 w-4" />
               Retour
             </Button>
-
             <Button
               type="button"
               disabled={!draft.selectedCompanyId || submitting}

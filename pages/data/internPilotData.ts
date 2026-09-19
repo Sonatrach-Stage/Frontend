@@ -7,7 +7,7 @@ export type SignupDraft = {
   internType: InternType
   selectedCompanyId: number | null
   selectedSupervisorId: number | null
-  password: string
+  
   confirmPassword: string
 
   // Informations stagiaire

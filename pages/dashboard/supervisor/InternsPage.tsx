@@ -5,14 +5,14 @@ import { Button } from '../../../lib/shadcn/button'
 import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
 import { cn } from '../../../lib/shadcn/utils'
-import { supervisorInternsDetailed, type SupervisorInternDetailed } from '../../data/dashboardMockData'
+import { supervisorInternsDetailed, type SupervisorIntern } from '../../data/dashboardMockData'
 
 export default function InternsPage() {
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState<'Tous' | 'PFE' | 'PFC'>('Tous')
   const [statusFilter, setStatusFilter] = useState<'Tous' | 'En cours' | 'Terminé'>('Tous')
  const [selected, setSelected] =
-  useState<SupervisorIntern | null>(null)
+useState<SupervisorIntern | null>(null)
 
   const filtered = supervisorInternsDetailed.filter((intern) => {
     const matchesSearch = intern.name.toLowerCase().includes(search.toLowerCase())

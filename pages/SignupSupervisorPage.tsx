@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Button } from '../lib/shadcn/button'
 import { Card } from '../lib/shadcn/card'
-import { companies, type SignupDraft } from './data/internPilotData'
+import type { SignupDraft } from './data/internPilotData'
 import { AuthHeader } from './ui/AuthHeader'
 import { StepIndicator } from './ui/StepIndicator'
 import { registerSupervisor } from '../api/auth'
+import { getApprovedCompaniesPublic, type PublicCompany } from '../api/companies'
 
 type SignupSupervisorPageProps = {
   draft: SignupDraft
@@ -24,6 +25,13 @@ export default function SignupSupervisorPage({ draft }: SignupSupervisorPageProp
   const navigate = useNavigate()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [companies, setCompanies] = useState<PublicCompany[]>([])
+
+  useEffect(() => {
+    getApprovedCompaniesPublic()
+      .then((res) => setCompanies(res.companies))
+      .catch(() => {})
+  }, [])
 
   const selectedCompany = companies.find((c) => c.id === draft.selectedCompanyId)
 

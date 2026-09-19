@@ -349,9 +349,9 @@ export const internTimeline = [
 ]
 
 export const internDeadlines = [
-  { icon: '📄', text: 'Remise version 2 du rapport', date: '20 septembre' },
-  { icon: '📅', text: 'Réunion avec encadrant', date: '22 septembre' },
-  { icon: '🎓', text: 'Soutenance', date: '15 décembre' },
+  { icon: '', text: 'Remise version 2 du rapport', date: '20 septembre' },
+  { icon: '', text: 'Réunion avec encadrant', date: '22 septembre' },
+  { icon: '', text: 'Soutenance', date: '15 décembre' },
 ]
 
 export type InternActivity = {

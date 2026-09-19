@@ -1,7 +1,12 @@
 import { apiRequest } from './client';
 
-export async function deleteCompany(id: number) {
-  return apiRequest(`/companies/${id}`, {
-    method: 'DELETE',
-  });
+export type PublicCompany = {
+  id: number
+  name: string
+  logo: string
+  company_status: string
+}
+
+export async function getApprovedCompaniesPublic(): Promise<{ success: boolean; companies: PublicCompany[] }> {
+  return apiRequest('/companies/approved');
 }

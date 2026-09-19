@@ -5,9 +5,10 @@ export default function SupervisorProfilePage() {
     <ProfilePage
       roleLabel="Encadrant"
       extraFields={[
-        { label: 'Poste', defaultValue: 'Architecte réseau senior' },
-        { label: 'Département', defaultValue: 'Infrastructure' },
-        { label: 'Spécialisation', defaultValue: 'Réseaux & Cloud hybride' },
+        { label: 'Poste', key: 'job' },
+        { label: 'Département', key: 'department' },
+        { label: 'Spécialisation', key: 'specialization' },
+        { label: "Années d'expérience", key: 'years_of_experience' },
       ]}
     />
   )
