@@ -14,7 +14,7 @@ export default function InternsPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Stagiaires</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Tous les stagiaires, toutes entreprises confondues.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="mb-5 flex gap-2">

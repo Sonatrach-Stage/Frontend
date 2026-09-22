@@ -64,7 +64,8 @@ export default function SignupRolePage({ draft, updateDraft }: SignupRolePagePro
         <div className="max-w-[760px]">
           <h1 className="text-4xl font-black tracking-tight text-[rgb(var(--intern-navy))] dark:text-foreground">Quel est votre rôle ?</h1>
           <p className="mt-3 text-base leading-7 text-muted-foreground">
-          
+            Chaque rôle dispose d'un parcours d'inscription dédié. Aucun accès visiteur n'est proposé : un compte est
+            obligatoire pour utiliser la plateforme.
           </p>
         </div>
 

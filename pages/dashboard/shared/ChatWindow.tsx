@@ -1,42 +1,107 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Paperclip, Send, Trash2 } from 'lucide-react'
 import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
 import { cn } from '../../../lib/shadcn/utils'
-import { deleteMessage } from '../../../api/chat'
-import type { ChatMessage } from '../../data/dashboardMockData'
+import { connectSocket } from '../../../lib/socket'
+import { getOrCreateConversation, getConversationMessages, deleteMessage as apiDeleteMessage, type ChatMessage as ApiChatMessage } from '../../../api/chat'
+import { getCurrentUser } from '../../../lib/auth'
 
 export function ChatWindow({
   contactName,
   contactRole,
-  initialMessages,
-  currentRole,
 }: {
   contactName: string
   contactRole: string
-  initialMessages: ChatMessage[]
-  currentRole: 'intern' | 'supervisor'
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
+  const currentUser = getCurrentUser()
+  const [conversationId, setConversationId] = useState<number | null>(null)
+  const [messages, setMessages] = useState<ApiChatMessage[]>([])
   const [draft, setDraft] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [otherTyping, setOtherTyping] = useState(false)
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function init() {
+      setLoading(true)
+      setError('')
+      try {
+        const { conversation } = await getOrCreateConversation(contactName)
+        if (cancelled) return
+        setConversationId(conversation.id)
+
+        const { messages: history } = await getConversationMessages(conversation.id)
+        if (cancelled) return
+        setMessages(history)
+
+        const socket = connectSocket()
+        socket.emit('join_conversation', { conversation_id: conversation.id })
+
+        socket.on('new_message', (message: ApiChatMessage) => {
+          if (message.conversation_id === conversation.id) {
+            setMessages((current) => [...current, message])
+          }
+        })
+
+        socket.on('message_error', (payload: { message: string }) => {
+          setError(payload.message)
+        })
+
+        socket.on('user_typing', () => setOtherTyping(true))
+        socket.on('user_stop_typing', () => setOtherTyping(false))
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Erreur de chargement de la conversation')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    init()
+
+    return () => {
+      cancelled = true
+      const socket = connectSocket()
+      socket.off('new_message')
+      socket.off('message_error')
+      socket.off('user_typing')
+      socket.off('user_stop_typing')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactName])
+
+  function handleInputChange(value: string) {
+    setDraft(value)
+    if (!conversationId) return
+
+    const socket = connectSocket()
+    socket.emit('typing', { conversation_id: conversationId })
+
+    if (typingTimeout.current) clearTimeout(typingTimeout.current)
+    typingTimeout.current = setTimeout(() => {
+      socket.emit('stop_typing', { conversation_id: conversationId })
+    }, 1500)
+  }
 
   function sendMessage() {
-    if (!draft.trim()) return
-    setMessages((current) => [
-      ...current,
-      { id: current.length + 1, sender: currentRole, text: draft.trim(), time: "À l'instant" },
-    ])
+    if (!draft.trim() || !conversationId) return
+    const socket = connectSocket()
+    socket.emit('send_message', { conversation_id: conversationId, content: draft.trim() })
+    socket.emit('stop_typing', { conversation_id: conversationId })
     setDraft('')
   }
 
   async function handleDeleteMessage(messageId: number) {
     if (!confirm('Supprimer ce message ?')) return
     try {
-      await deleteMessage(messageId)
+      await apiDeleteMessage(messageId)
       setMessages((current) => current.filter((m) => m.id !== messageId))
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erreur lors de la suppression du message')
+      alert(err instanceof Error ? err.message : 'Erreur lors de la suppression')
     }
   }
 
@@ -48,39 +113,45 @@ export function ChatWindow({
         </div>
         <div>
           <p className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{contactName}</p>
-          <p className="text-xs text-muted-foreground">{contactRole}</p>
+          <p className="text-xs text-muted-foreground">{otherTyping ? 'En train d\'écrire...' : contactRole}</p>
         </div>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-5">
-        {messages.map((msg) => (
-          <div key={msg.id} className={cn('group flex items-center gap-2', msg.sender === currentRole ? 'justify-end' : 'justify-start')}>
-            {msg.sender === currentRole && (
-              <button
-                type="button"
-                onClick={() => handleDeleteMessage(msg.id)}
-                className="opacity-0 transition-opacity group-hover:opacity-100"
-                aria-label="Supprimer le message"
-              >
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-600" />
-              </button>
-            )}
-            <div
-              className={cn(
-                'max-w-[70%] rounded-2xl px-4 py-2.5 text-sm',
-                msg.sender === currentRole
-                  ? 'bg-[rgb(var(--intern-navy))] text-white'
-                  : 'bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))] dark:bg-secondary dark:text-foreground',
+        {loading && <p className="text-center text-sm text-muted-foreground">Chargement...</p>}
+        {error && <p className="rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
+
+        {!loading && messages.map((msg) => {
+          const isMine = msg.sender_id === currentUser?.id
+          return (
+            <div key={msg.id} className={cn('group flex items-center gap-2', isMine ? 'justify-end' : 'justify-start')}>
+              {isMine && (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteMessage(msg.id)}
+                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  aria-label="Supprimer le message"
+                >
+                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-600" />
+                </button>
               )}
-            >
-              <p>{msg.text}</p>
-              <p className={cn('mt-1 text-[10px]', msg.sender === currentRole ? 'text-white/60' : 'text-muted-foreground')}>
-                {msg.time}
-              </p>
+              <div
+                className={cn(
+                  'max-w-[70%] rounded-2xl px-4 py-2.5 text-sm',
+                  isMine
+                    ? 'bg-[rgb(var(--intern-navy))] text-white'
+                    : 'bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))] dark:bg-secondary dark:text-foreground',
+                )}
+              >
+                <p>{msg.content}</p>
+                <p className={cn('mt-1 text-[10px]', isMine ? 'text-white/60' : 'text-muted-foreground')}>
+                  {new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-        {messages.length === 0 && (
+          )
+        })}
+        {!loading && messages.length === 0 && (
           <p className="mt-10 text-center text-sm text-muted-foreground">Aucun message pour le moment.</p>
         )}
       </div>
@@ -91,7 +162,7 @@ export function ChatWindow({
         </Button>
         <Input
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => handleInputChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
           placeholder="Écrivez un message..."
           className="h-10 rounded-xl"

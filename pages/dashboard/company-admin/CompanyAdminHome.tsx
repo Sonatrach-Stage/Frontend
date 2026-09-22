@@ -10,10 +10,10 @@ export default function CompanyAdminHome() {
   const pending = accountValidationRequests.filter((r) => r.status === 'En attente')
 
   const stats = [
-    { icon: '👨‍🎓', label: 'Stagiaires', value: '24', sub: '+3 ce mois' },
-    { icon: '👨‍💼', label: 'Encadrants', value: '12', sub: '10 actifs' },
-    { icon: '⏳', label: 'À valider', value: String(pending.length), sub: 'Action requise' },
-    { icon: '📋', label: 'Stages actifs', value: '18', sub: '' },
+    { icon: '', label: 'Stagiaires', value: '24', sub: '+3 ce mois' },
+    { icon: '', label: 'Encadrants', value: '12', sub: '10 actifs' },
+    { icon: '', label: 'À valider', value: String(pending.length), sub: 'Action requise' },
+    { icon: '', label: 'Stages actifs', value: '18', sub: '' },
   ]
 
   return (

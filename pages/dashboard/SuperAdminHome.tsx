@@ -12,10 +12,10 @@ export default function SuperAdminHome() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">
-          Bienvenue dans l'administration 👋
+          Bienvenue dans l'administration 
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Vue globale sur toutes les entreprises, stagiaires et encadrants.
+         
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export default function SuperAdminHome() {
       <Card className="mt-6 rounded-3xl p-6 shadow-retool-sm">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">
-            🚨 Demandes d'inscription
+            Demandes d'inscription
           </h2>
           <Badge className="bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))] dark:bg-secondary dark:text-foreground">
             {registrationRequests.length} en attente
@@ -78,7 +78,7 @@ export default function SuperAdminHome() {
       </Card>
 
       {user ? (
-        <p className="mt-6 text-xs text-muted-foreground">Connecté en tant que {user.name}</p>
+        <p className="mt-6 text-xs text-muted-foreground"> </p>
       ) : null}
     </>
   )

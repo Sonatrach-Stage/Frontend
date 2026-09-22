@@ -1,91 +1,129 @@
-import { useState } from 'react'
-import { Download, Eye, FileText, Search } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Download, Eye, X } from 'lucide-react'
 import { Badge } from '../../../lib/shadcn/badge'
 import { Card } from '../../../lib/shadcn/card'
-import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
-import { cn } from '../../../lib/shadcn/utils'
-import { supervisorDocuments, type DocCategory } from '../../data/dashboardMockData'
-
-const categories: Array<DocCategory | 'Tous'> = [
-  'Tous', 'Convention', 'Rapport', 'Mémoire', 'Cahier des charges', 'Attestation', 'Administratif', 'Autre',
-]
+import { Textarea } from '../../../lib/shadcn/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../lib/shadcn/select'
+import { getPendingDocuments, reviewDocument, type PendingDocument } from '../../../api/documents'
 
 export default function DocumentsPage() {
-  const [activeCategory, setActiveCategory] = useState<DocCategory | 'Tous'>('Tous')
-  const [search, setSearch] = useState('')
+  const [documents, setDocuments] = useState<PendingDocument[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [reviewingId, setReviewingId] = useState<number | null>(null)
+  const [comment, setComment] = useState('')
+  const [status, setStatus] = useState<'APPROVED' | 'REVISION_REQUIRED' | 'REJECTED'>('APPROVED')
+  const [submitting, setSubmitting] = useState(false)
 
-  const filtered = supervisorDocuments.filter((doc) => {
-    const matchesCategory = activeCategory === 'Tous' || doc.category === activeCategory
-    const matchesSearch = `${doc.name} ${doc.intern}`.toLowerCase().includes(search.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+  function loadDocuments() {
+    setLoading(true)
+    getPendingDocuments()
+      .then((res) => setDocuments(res.documents))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadDocuments()
+  }, [])
+
+  function startReview(doc: PendingDocument) {
+    setReviewingId(doc.id)
+    setComment('')
+    setStatus('APPROVED')
+  }
+
+  async function submitReview(doc: PendingDocument) {
+    setSubmitting(true)
+    setError('')
+    try {
+      await reviewDocument(doc.id, { version_id: doc.version_id, status, comment })
+      setReviewingId(null)
+      loadDocuments()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'évaluation")
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <>
       <div className="mb-7">
-        <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Documents</h1>
-        <p className="mt-2 text-sm text-muted-foreground"></p>
+        <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Documents à traiter</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Documents en attente de vos stagiaires affectés.</p>
       </div>
 
-      <div className="mb-5 flex flex-wrap gap-2">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setActiveCategory(cat)}
-            className={cn(
-              'rounded-xl border px-3.5 py-2 text-xs font-semibold transition-colors',
-              activeCategory === cat ? 'border-[rgb(var(--intern-blue))] bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))]' : 'hover:bg-muted',
-            )}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
+      {error && <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
 
-      <div className="relative mb-5 max-w-md">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher un document ou un stagiaire..."
-          className="h-10 rounded-2xl pl-11 shadow-sm"
-        />
-      </div>
-
-      <div className="space-y-3">
-        {filtered.map((doc) => (
-          <Card key={doc.id} className="rounded-2xl p-4 shadow-retool-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-blue))]">
-                  <FileText className="h-5 w-5" />
-                </div>
+      {!loading && (
+        <div className="space-y-3">
+          {documents.map((doc) => (
+            <Card key={doc.id} className="rounded-2xl p-5 shadow-retool-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="font-bold text-foreground">{doc.name}</p>
-                  <p className="text-xs text-muted-foreground">{doc.intern} · {doc.category} · {doc.date}</p>
+                  <p className="font-bold text-foreground">{doc.title}</p>
+                  <p className="text-sm text-muted-foreground">{doc.intern_name} · {doc.document_type} · V{doc.version_number}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{doc.file_name}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="rounded-full text-amber-600">🟡 {doc.status}</Badge>
+                  <a href={doc.file_url} target="_blank" rel="noreferrer">
+                    <Button size="sm" variant="outline" className="rounded-lg"><Eye className="h-3.5 w-3.5" /></Button>
+                  </a>
+                  <a href={doc.file_url} download>
+                    <Button size="sm" variant="outline" className="rounded-lg"><Download className="h-3.5 w-3.5" /></Button>
+                  </a>
+                  {reviewingId !== doc.id && (
+                    <Button size="sm" className="rounded-lg bg-[rgb(var(--intern-navy))] text-white" onClick={() => startReview(doc)}>
+                      Évaluer
+                    </Button>
+                  )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant="outline"
-                  className={cn('rounded-full', !doc.seen && 'border-amber-300 text-amber-600')}
-                >
-                  {doc.seen ? 'Consulté' : "En cours d'exécution"}
-                </Badge>
-                <Button size="sm" variant="outline" className="rounded-lg"><Eye className="h-3.5 w-3.5" /></Button>
-                <Button size="sm" variant="outline" className="rounded-lg"><Download className="h-3.5 w-3.5" /></Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-        {filtered.length === 0 && (
-          <Card className="rounded-2xl border-dashed p-10 text-center text-sm text-muted-foreground">
-            Aucun document dans cette catégorie.
-          </Card>
-        )}
-      </div>
+
+              {reviewingId === doc.id && (
+                <div className="mt-4 rounded-xl border bg-background/70 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">Évaluation</p>
+                    <button type="button" onClick={() => setReviewingId(null)} className="rounded-full p-1 hover:bg-muted">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
+                    <SelectTrigger className="mt-3 h-10 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="APPROVED">Approuvé</SelectItem>
+                      <SelectItem value="REVISION_REQUIRED">Corrections demandées</SelectItem>
+                      <SelectItem value="REJECTED">Rejeté</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Commentaire pour le stagiaire"
+                    className="mt-3 rounded-xl"
+                  />
+                  <Button
+                    disabled={submitting}
+                    className="mt-3 rounded-xl bg-[rgb(var(--intern-navy))] text-white"
+                    onClick={() => submitReview(doc)}
+                  >
+                    {submitting ? 'Envoi...' : "Enregistrer l'évaluation"}
+                  </Button>
+                </div>
+              )}
+            </Card>
+          ))}
+          {documents.length === 0 && (
+            <Card className="rounded-2xl border-dashed p-10 text-center text-sm text-muted-foreground">
+              Aucun document en attente.
+            </Card>
+          )}
+        </div>
+      )}
     </>
   )
 }

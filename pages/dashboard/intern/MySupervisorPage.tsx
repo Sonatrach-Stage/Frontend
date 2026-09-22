@@ -19,10 +19,10 @@ export default function MySupervisorPage() {
           </div>
         </div>
         <div className="mt-4 space-y-1 text-sm text-muted-foreground">
-          <p>Entreprise : Algérie Télécom</p>
-          <p>Email : ahmed.benali@Algérie_Télécom.ma</p>
+          <p>Entreprise : Atlas Telecom</p>
+          <p>Email : ahmed.benali@atlas-telecom.ma</p>
           <p>Téléphone : +213 661 23 45 10</p>
-          <p>Fonction : développer, d'exploiter et de commercialiser les services de communication électronique, de téléphonie et d'internet à l'échelle nationale.</p>
+          <p>Fonction : Architecte réseau senior</p>
           <p>Disponibilité : Lun–Ven, 9h–17h</p>
         </div>
         <div className="mt-5 flex flex-wrap gap-3">

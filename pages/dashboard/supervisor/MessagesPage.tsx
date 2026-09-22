@@ -1,49 +1,37 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card } from '../../../lib/shadcn/card'
 import { cn } from '../../../lib/shadcn/utils'
 import { ChatWindow } from '../shared/ChatWindow'
-import { chatByIntern } from '../../data/dashboardMockData'
-import { supervisorInterns } from '../../data/dashboardMockData'
+import { getSupervisors } from '../../../api/adminsec'
 
 export default function MessagesPage() {
-  const [selected, setSelected] = useState(supervisorInterns[0]?.name ?? '')
+  const [internNames, setInternNames] = useState<string[]>([])
+  const [selected, setSelected] = useState<string>('')
+
+  useEffect(() => {
+    // ⚠️ Idéalement il faudrait GET /adminsec/interns/actives filtré sur "mes stagiaires affectés",
+    // mais en attendant une route dédiée côté encadrant, laisse ce champ vide et saisis le nom manuellement.
+  }, [])
 
   return (
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Messages</h1>
-        <p className="mt-2 text-sm text-muted-foreground"></p>
+        <p className="mt-2 text-sm text-muted-foreground">Discutez avec vos stagiaires affectés.</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <Card className="rounded-3xl p-4 shadow-retool-sm">
-          <p className="mb-3 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Stagiaires</p>
-          <div className="space-y-1">
-            {supervisorInterns.map((intern) => (
-              <button
-                key={intern.name}
-                type="button"
-                onClick={() => setSelected(intern.name)}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors hover:bg-muted',
-                  selected === intern.name && 'bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))]',
-                )}
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgb(var(--intern-navy))] text-xs font-black text-white">
-                  {intern.name.slice(0, 2).toUpperCase()}
-                </span>
-                {intern.name}
-              </button>
-            ))}
-          </div>
+      <div className="mx-auto max-w-2xl space-y-4">
+        <Card className="rounded-2xl p-4 shadow-retool-sm">
+          <label className="mb-2 block text-sm font-semibold text-foreground">Nom du stagiaire</label>
+          <input
+            value={selected}
+            onChange={(e) => setSelected(e.target.value)}
+            placeholder="Ex. Katia Benali"
+            className="h-10 w-full rounded-xl border px-3 text-sm"
+          />
         </Card>
 
-        <ChatWindow
-          contactName={selected}
-          contactRole="Stagiaire affecté"
-          initialMessages={chatByIntern[selected] ?? []}
-          currentRole="supervisor"
-        />
+        {selected && <ChatWindow contactName={selected} contactRole="Stagiaire affecté" />}
       </div>
     </>
   )

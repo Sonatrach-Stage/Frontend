@@ -168,76 +168,12 @@ export const supervisorDocuments: SupervisorDocument[] = [
 // --- Rapports et mémoires : PFE / PFC, publication globale ---
 
 
-export type ThesisStatus =
-  | 'Brouillon'
-  | 'Soumis'
-  | 'En cours de révision'
-  | 'À corriger'
-  | 'Validé'
 
-export type Thesis = {
-  id: number
-  title: string
-  intern: string
-  company: string
-  kind: 'Rapport' | 'Mémoire'
-  version: number
-  date: string
-  status: ThesisStatus
-  published: boolean
-}
-
-export const theses: Thesis[] = [
-  {
-    id: 1,
-    title: 'Application de gestion des stages',
-    intern: 'Zineb Ouled Laid',
-    company: 'Atlas Telecom',
-    kind: 'Rapport',
-    version: 1,
-    date: '10/09/2026',
-    status: 'Soumis',
-    published: false,
-  },
-  {
-    id: 2,
-    title: 'Plateforme intelligente de gestion des stages',
-    intern: 'Ahmed Benali',
-    company: 'Atlas Telecom',
-    kind: 'Mémoire',
-    version: 2,
-    date: '08/09/2026',
-    status: 'En cours de révision',
-    published: false,
-  },
-  {
-    id: 3,
-    title: 'Système de suivi des stagiaires',
-    intern: 'Sarah K.',
-    company: 'Sonatrach',
-    kind: 'Rapport',
-    version: 1,
-    date: '05/09/2026',
-    status: 'Validé',
-    published: true,
-  },
-  {
-    id: 4,
-    title: 'Intelligence artificielle pour la gestion des PFE',
-    intern: 'Mohamed A.',
-    company: 'Sonatrach',
-    kind: 'Mémoire',
-    version: 1,
-    date: '03/09/2026',
-    status: 'À corriger',
-    published: false,
-  },
-]
 export const supervisorTodo = [
-  { icon: '⚠️', text: '3 tâches à valider' },
-  { icon: '📄', text: '2 rapports à consulter' },
-  { icon: '📅', text: '1 rendez-vous aujourd\'hui' },
-  { icon: '🔔', text: '4 nouvelles notifications' },
+  { icon: '', text: '3 tâches à valider' },
+  { icon: '', text: '2 rapports à consulter' },
+  { icon: '', text: '1 rendez-vous aujourd\'hui' },
+  { icon: '', text: '4 nouvelles notifications' },
 ]
 
 export type Appointment = { id: number; time: string; title: string; date: string; intern?: string }

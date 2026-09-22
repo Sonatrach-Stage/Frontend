@@ -15,6 +15,7 @@ type VerifyOtpPageProps = {
 export default function VerifyOtpPage({ draft }: VerifyOtpPageProps) {
   const navigate = useNavigate()
   const [otp, setOtp] = useState('')
+  console.log('Email dans le draft:', draft.email)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)

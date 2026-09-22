@@ -6,7 +6,7 @@ export default function DashboardTab() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Tableau de bord</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Vue statistique globale de la plateforme.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -21,8 +21,7 @@ export default function DashboardTab() {
       <Card className="mt-6 rounded-3xl p-6 shadow-retool-sm">
         <h2 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Répartition PFE / PFC</h2>
         <p className="mt-4 text-sm text-muted-foreground">
-          Graphiques détaillés (évolution des stages, stages par entreprise, rapports validés/refusés) — à connecter
-          à l'API une fois le backend disponible.
+          
         </p>
       </Card>
     </>

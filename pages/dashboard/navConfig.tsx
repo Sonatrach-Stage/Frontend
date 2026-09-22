@@ -28,7 +28,7 @@ export const companyAdminNav: NavItem[] = [
   { label: 'Encadrants', icon: Briefcase, path: 'encadrants' },
   { label: 'Affectations', icon: Layers, path: 'affectations' },
   
-  { label: 'Rapports', icon: FileText, path: 'rapports' },
+
   { label: 'Assistant IA', icon: Bot, path: 'ia' },
   { label: 'Notifications', icon: Bell, path: 'notifications' },
   { label: 'Entreprise', icon: Building2, path: 'entreprise' },
@@ -44,7 +44,7 @@ export const internNav: NavItem[] = [
   { label: 'Mes tâches', icon: CheckSquare, path: 'taches' },
   { label: 'Calendrier', icon: CalendarDays, path: 'calendrier' },
   { label: 'Messages', icon: MessageSquare, path: 'messages' },
-  { label: 'Mon rapport / mémoire', icon: FileText, path: 'rapport' },
+ 
   { label: 'Mes documents', icon: FolderOpen, path: 'documents' },
   { label: 'Assistant IA', icon: Bot, path: 'ia' },
   { label: 'Notifications', icon: Bell, path: 'notifications' },
@@ -60,7 +60,7 @@ export const supervisorNav: NavItem[] = [
   { label: 'Tâches', icon: CheckSquare, path: 'taches' },
   { label: 'Calendrier', icon: CalendarDays, path: 'calendrier' },
   { label: 'Messages', icon: MessageSquare, path: 'messages' },
-  { label: 'Rapports et mémoires', icon: FileText, path: 'rapports' },
+ 
   { label: 'Documents', icon: FolderOpen, path: 'documents' },
   { label: 'Assistant IA', icon: Bot, path: 'ia' },
   { label: 'Notifications', icon: Bell, path: 'notifications' },
@@ -75,7 +75,7 @@ export const superAdminNav: NavItem[] = [
   { label: 'Stagiaires', icon: GraduationCap, path: 'stagiaires' },
   { label: 'Encadrants', icon: UserCog, path: 'encadrants' },
   { label: 'Documents', icon: FolderOpen, path: 'documents' },
-  { label: 'Rapports', icon: FileText, path: 'rapports' },
+ 
   { label: 'Assistant IA', icon: Bot, path: 'ia' },
   { label: 'Notifications', icon: Bell, path: 'notifications' },
 ]

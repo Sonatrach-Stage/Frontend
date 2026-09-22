@@ -1,5 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useState } from 'react'
+import GoogleCallbackPage from './pages/GoogleCallbackPage'
+// ...
+
 import {
   Bell,
   Bot,
@@ -39,7 +42,7 @@ import ValidationsPage from './pages/dashboard/company-admin/ValidationsPage'
 import InternsPage from './pages/dashboard/company-admin/InternsPage'
 import AssignmentsPage from './pages/dashboard/company-admin/AssignmentsPage'
 import EncadrantsPage from './pages/dashboard/company-admin/EncadrantsPage'
-import CompanyAdminReportsPage from './pages/dashboard/company-admin/ReportsPage'
+import DocumentDetailPage from './pages/dashboard/intern/DocumentDetailPage'
 import CompanyAdminAssistantIAPage from './pages/dashboard/company-admin/AssistantIAPage'
 import CompanyAdminNotificationsPage from './pages/dashboard/company-admin/NotificationsPage'
 import CompanyPage from './pages/dashboard/company-admin/CompanyPage'
@@ -50,7 +53,7 @@ import InternHome from './pages/dashboard/intern/InternHome'
 import InternDashboardTab from './pages/dashboard/intern/DashboardTab'
 import MySupervisorPage from './pages/dashboard/intern/MySupervisorPage'
 import MyTasksPage from './pages/dashboard/intern/MyTasksPage'
-import MyReportPage from './pages/dashboard/intern/MyReportPage'
+
 import InternMessagesPage from './pages/dashboard/intern/MessagesPage'
 import InternDocumentsPage from './pages/dashboard/intern/MyDocumentsPage'
 import InternNotificationsPage from './pages/dashboard/intern/NotificationsPage'
@@ -68,7 +71,7 @@ import SupervisorActivitiesPage from './pages/dashboard/supervisor/ActivitiesPag
 import SupervisorTasksPage from './pages/dashboard/supervisor/TasksPage'
 import SupervisorCalendarPage from './pages/dashboard/supervisor/CalendarPage'
 import SupervisorMessagesPage from './pages/dashboard/supervisor/MessagesPage'
-import ReportsAndThesesPage from './pages/dashboard/supervisor/ReportsAndThesesPage'
+
 import SupervisorDocumentsPage from './pages/dashboard/supervisor/DocumentsPage'
 import SupervisorAssistantIAPage from './pages/dashboard/supervisor/AssistantIAPage'
 import SupervisorNotificationsPage from './pages/dashboard/supervisor/NotificationsPage'
@@ -146,6 +149,7 @@ export default function App() {
       <Route path="/signup/request" element={<SignupRequestPage draft={signupDraft} />} />
       <Route path="/signup/verify-otp" element={<VerifyOtpPage draft={signupDraft} />} />
       <Route path="/request-pending" element={<RequestPendingPage draft={signupDraft} />} />
+      <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 
       {/* ENTRÉE DASHBOARD */}
       <Route path="/dashboard" element={<DashboardEntry />} />
@@ -169,7 +173,7 @@ export default function App() {
         <Route path="encadrants" element={<EncadrantsPage />} />
         <Route path="affectations" element={<AssignmentsPage />} />
         <Route path="documents" element={<PlaceholderPage icon={FolderOpen} title="Documents" description="Bibliothèque documentaire de l'entreprise." />} />
-        <Route path="rapports" element={<CompanyAdminReportsPage />} />
+       
         <Route path="ia" element={<CompanyAdminAssistantIAPage />} />
         <Route path="notifications" element={<CompanyAdminNotificationsPage />} />
         <Route path="entreprise" element={<CompanyPage />} />
@@ -195,7 +199,8 @@ export default function App() {
         <Route path="taches" element={<MyTasksPage />} />
         <Route path="calendrier" element={<InternCalendarPage />} />
         <Route path="messages" element={<InternMessagesPage />} />
-        <Route path="rapport" element={<MyReportPage />} />
+       <Route path="documents" element={<InternDocumentsPage />} />
+<Route path="documents/:id" element={<DocumentDetailPage />} />
         <Route path="documents" element={<InternDocumentsPage />} />
         <Route path="ia" element={<AssistantIAPage />} />
         <Route path="notifications" element={<InternNotificationsPage />} />
@@ -222,7 +227,7 @@ export default function App() {
         <Route path="taches" element={<SupervisorTasksPage />} />
         <Route path="calendrier" element={<SupervisorCalendarPage />} />
         <Route path="messages" element={<SupervisorMessagesPage />} />
-        <Route path="rapports" element={<ReportsAndThesesPage />} />
+   
         <Route path="documents" element={<SupervisorDocumentsPage />} />
         <Route path="ia" element={<SupervisorAssistantIAPage />} />
         <Route path="notifications" element={<SupervisorNotificationsPage />} />

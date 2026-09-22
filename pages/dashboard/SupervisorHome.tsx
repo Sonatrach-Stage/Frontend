@@ -29,7 +29,7 @@ export default function SupervisorHome() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">
-          Bonjour, {user?.name ?? 'Encadrant'} 👋
+          Bonjour, {user?.name ?? 'Encadrant'} 
         </h1>
         <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>

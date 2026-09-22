@@ -52,7 +52,7 @@ export default function RequestsPage() {
     <>
       <div className="mb-7">
         <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Demandes</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Demandes d'ouverture d'espace entreprise en attente.</p>
+        <p className="mt-2 text-sm text-muted-foreground"></p>
       </div>
 
       {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
