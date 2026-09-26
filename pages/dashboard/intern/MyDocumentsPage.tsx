@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, FileText, Search } from 'lucide-react'
+import { Plus, FileText, Search, Upload } from 'lucide-react'
 import { Card } from '../../../lib/shadcn/card'
 import { Badge } from '../../../lib/shadcn/badge'
 import { Button } from '../../../lib/shadcn/button'
@@ -9,7 +9,7 @@ import { Textarea } from '../../../lib/shadcn/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../lib/shadcn/select'
 import { cn } from '../../../lib/shadcn/utils'
 import { getCurrentUser } from '../../../lib/auth'
-import { createDocument, getMyDocuments, searchDocuments, type ApiDocument, type PendingDocument } from '../../../api/documents'
+import { createDocument, addDocumentVersion, getMyDocuments, searchDocuments, type ApiDocument, type PendingDocument } from '../../../api/documents'
 
 const statusLabel: Record<string, { text: string; color: string }> = {
   PENDING: { text: 'En attente de review', color: 'text-amber-600' },
@@ -18,12 +18,14 @@ const statusLabel: Record<string, { text: string; color: string }> = {
   REJECTED: { text: 'Rejeté', color: 'text-red-600' },
 }
 
-const baseTypes = ['brouillon', 'specification', 'diagramme', 'presentation', 'rapport_hebdomadaire', 'autre']
+const baseTypes = ['brouillon', 'specification', 'diagramme', 'presentation', 'rapport_hebdomadaire', 'memoire', 'projet', 'autre']
 
 export default function MyDocumentsPage() {
   const user = getCurrentUser()
   const finalType = user?.internType === 'PFE' ? 'FINAL_THESIS' : 'FINAL_REPORT'
   const documentTypes = [...baseTypes, finalType]
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [documents, setDocuments] = useState<ApiDocument[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +35,7 @@ export default function MyDocumentsPage() {
   const [description, setDescription] = useState('')
   const [documentType, setDocumentType] = useState('brouillon')
   const [taskTitle, setTaskTitle] = useState('')
+  const [file, setFile] = useState<File | null>(null)
   const [creating, setCreating] = useState(false)
 
   const [search, setSearch] = useState('')
@@ -51,21 +54,33 @@ export default function MyDocumentsPage() {
     loadDocuments()
   }, [])
 
+  function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
+    const selected = event.target.files?.[0]
+    if (selected) setFile(selected)
+  }
+
   async function handleCreate() {
     if (!title.trim() || !documentType) return
     setCreating(true)
     setError('')
     try {
-      await createDocument({
+      const res = await createDocument({
         title,
         description,
         document_type: documentType,
         ...(taskTitle.trim() ? { task_title: taskTitle } : {}),
       })
+
+      if (file) {
+        await addDocumentVersion(res.document.id, file)
+      }
+
       setTitle('')
       setDescription('')
       setTaskTitle('')
       setDocumentType('brouillon')
+      setFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       loadDocuments()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la création')
@@ -112,11 +127,33 @@ export default function MyDocumentsPage() {
           </Select>
           <Input value={taskTitle} onChange={(e) => setTaskTitle(e.target.value)} placeholder="Lier à une tâche (optionnel)" className="h-10 rounded-xl" />
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Une fois le document créé, vous pourrez y déposer votre premier fichier (version 1).
-        </p>
+
+        <div className="mt-4">
+          <p className="mb-2 text-sm font-semibold text-foreground"></p>
+          <div
+            className={cn(
+              'flex items-center gap-3 rounded-xl border border-dashed p-4',
+              file ? 'border-[rgb(var(--intern-blue))] bg-[rgb(var(--intern-soft-blue))]' : 'bg-background/60',
+            )}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-card text-[rgb(var(--intern-blue))]">
+              {file ? <FileText className="h-5 w-5" /> : <Upload className="h-5 w-5" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-foreground">{file ? file.name : 'Aucun fichier sélectionné'}</p>
+              <p className="text-xs text-muted-foreground">{file ? `${(file.size / (1024 * 1024)).toFixed(2)} Mo` : 'PDF, DOC, image...'}</p>
+            </div>
+            <Button type="button" variant="outline" size="sm" className="rounded-lg" onClick={() => fileInputRef.current?.click()}>
+              {file ? 'Changer' : 'Choisir un fichier'}
+            </Button>
+            <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} />
+          </div>
+        </div>
+
+        {error && <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
+
         <Button disabled={creating} className="mt-4 rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={handleCreate}>
-          <Plus className="h-4 w-4" /> {creating ? 'Création...' : 'Créer le document'}
+          <Plus className="h-4 w-4" /> {creating ? 'Envoi en cours...' : 'Créer le document'}
         </Button>
       </Card>
 
@@ -141,7 +178,6 @@ export default function MyDocumentsPage() {
         )}
       </div>
 
-      {error && <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
       {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
 
       {!loading && (
