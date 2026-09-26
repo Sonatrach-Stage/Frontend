@@ -1,12 +1,15 @@
+import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { Bell, Search } from 'lucide-react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
+
 import { Badge } from '../../lib/shadcn/badge'
 import { Input } from '../../lib/shadcn/input'
 import { cn } from '../../lib/shadcn/utils'
 import { BrandLogo } from '../ui/BrandLogo'
 import { UserMenu } from './shared/UserMenu'
 import type { CurrentUser } from '../../lib/auth'
+import { getUnreadCount } from '../../api/notifications'
 
 export type NavItem = {
   label: string
@@ -27,14 +30,20 @@ export function DashboardLayout({
   roleLabel,
   user,
 }: DashboardLayoutProps) {
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    getUnreadCount()
+      .then((res) => setUnreadCount(res.count))
+      .catch(() => {})
+  }, [])
+
   return (
     <main className="min-h-screen bg-[rgb(var(--intern-page))] text-foreground dark:bg-background">
-
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-[267px] flex-col bg-[rgb(var(--intern-navy-deep))] text-white lg:flex">
-
-        {/* Logo */}
-        <div className="shrink-0 px-7 py-8">
+        {/* LOGO */}
+        <div className="px-7 py-8">
           <Link
             to={basePath}
             aria-label="Retour à l'accueil du tableau de bord"
@@ -43,26 +52,12 @@ export function DashboardLayout({
           </Link>
         </div>
 
-        {/* Menu avec défilement */}
-        <nav
-          className="
-            min-h-0
-            flex-1
-            overflow-y-auto
-            space-y-2
-            px-3
-            pb-4
-            [scrollbar-width:thin]
-            [scrollbar-color:rgba(255,255,255,0.25)_transparent]
-          "
-        >
+        {/* NAVIGATION */}
+        <nav className="flex-1 space-y-2 overflow-y-auto px-3 py-2 [scrollbar-color:rgba(255,255,255,0.25)_transparent] [scrollbar-width:thin]">
           {navItems.map((item) => {
             const Icon = item.icon
-
             const to =
-              item.path === ''
-                ? basePath
-                : `${basePath}/${item.path}`
+              item.path === '' ? basePath : `${basePath}/${item.path}`
 
             return (
               <NavLink
@@ -71,27 +66,21 @@ export function DashboardLayout({
                 end={item.path === ''}
                 className={({ isActive }) =>
                   cn(
-                    'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold',
-                    'text-white/78 transition-colors',
-                    'hover:bg-white/10 hover:text-white',
+                    'flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold text-white/78 transition-colors hover:bg-white/10 hover:text-white',
                     isActive &&
                       'bg-[rgb(var(--intern-blue))] text-white shadow-retool-sm',
                   )
                 }
               >
-                <Icon className="h-4 w-4 shrink-0" />
-
-                <span className="truncate">
-                  {item.label}
-                </span>
+                <Icon className="h-4 w-4" />
+                {item.label}
               </NavLink>
             )
           })}
         </nav>
 
-        {/* Informations utilisateur */}
-        <div className="shrink-0 border-t border-white/10 p-5">
-
+        {/* INFORMATIONS UTILISATEUR */}
+        <div className="border-t border-white/10 p-5">
           <p className="text-[10px] uppercase tracking-[0.35em] text-white/55">
             Espace connecté
           </p>
@@ -105,31 +94,16 @@ export function DashboardLayout({
               {user.companyName}
             </p>
           ) : null}
-
         </div>
       </aside>
 
-      {/* Contenu principal */}
+      {/* CONTENU PRINCIPAL */}
       <section className="lg:pl-[267px]">
-
-        {/* Header */}
+        {/* HEADER */}
         <header className="sticky top-0 z-10 flex h-[74px] items-center justify-between gap-4 border-b bg-card/95 px-6 backdrop-blur">
-
-          {/* Recherche */}
+          {/* RECHERCHE */}
           <div className="relative w-full max-w-[450px]">
-
-            <Search
-              className="
-                pointer-events-none
-                absolute
-                left-4
-                top-1/2
-                h-4
-                w-4
-                -translate-y-1/2
-                text-muted-foreground
-              "
-            />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
             <Input
               placeholder="Rechercher..."
@@ -137,10 +111,8 @@ export function DashboardLayout({
             />
           </div>
 
-          {/* Actions */}
+          {/* ACTIONS HEADER */}
           <div className="flex items-center gap-3">
-
-            {/* Rôle */}
             <Badge
               variant="outline"
               className="hidden rounded-full px-4 py-2 font-semibold sm:inline-flex"
@@ -148,7 +120,7 @@ export function DashboardLayout({
               Vue: {roleLabel}
             </Badge>
 
-            {/* Notifications */}
+            {/* NOTIFICATIONS */}
             <Link
               to={`${basePath}/notifications`}
               aria-label="Notifications"
@@ -156,42 +128,26 @@ export function DashboardLayout({
             >
               <Bell className="h-5 w-5 text-foreground" />
 
-              <span
-                className="
-                  absolute
-                  right-1
-                  top-0
-                  flex
-                  h-4
-                  w-4
-                  items-center
-                  justify-center
-                  rounded-full
-                  bg-destructive
-                  text-[10px]
-                  font-bold
-                  text-destructive-foreground
-                "
-              >
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute right-1 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </Link>
 
-            {/* Profil utilisateur */}
+            {/* MENU UTILISATEUR */}
             <UserMenu
               user={user}
               roleLabel={roleLabel}
               basePath={basePath}
             />
-
           </div>
         </header>
 
-        {/* Page */}
+        {/* PAGE */}
         <div className="p-6 sm:p-8">
           <Outlet />
         </div>
-
       </section>
     </main>
   )
