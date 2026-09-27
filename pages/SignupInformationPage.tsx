@@ -40,7 +40,7 @@ import { AuthHeader } from './ui/AuthHeader'
 import { StepIndicator } from './ui/StepIndicator'
 
 import { cn } from '../lib/shadcn/utils'
-import { checkEmail } from '../api/auth'
+import { checkEmail } from '../services/auth'
 
 type SignupInformationPageProps = {
   draft: SignupDraft

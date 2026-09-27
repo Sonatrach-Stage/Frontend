@@ -13,7 +13,7 @@ import { Button } from '../lib/shadcn/button'
 import { Input } from '../lib/shadcn/input'
 import { BrandLogo } from './ui/BrandLogo'
 import { saveCurrentUser, saveTokens, mapBackendRole } from '../lib/auth'
-import { login } from '../api/auth'
+import { login } from '../services/auth'
 
 const highlights = [
   {

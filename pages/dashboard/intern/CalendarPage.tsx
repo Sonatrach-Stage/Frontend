@@ -1,5 +1,5 @@
 import { AppointmentsBoard } from '../shared/AppointmentsBoard'
-import { getInternAppointments } from '../../../api/appointments'
+import { getInternAppointments } from '../../../services/appointments'
 
 export default function CalendarPage() {
   return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../../../lib/shadcn/card'
 import { BarBreakdown } from '../shared/StatCharts'
-import { getInternStatistics, type InternStatistics } from '../../../api/statistics'
+import { getInternStatistics, type InternStatistics } from '../../../services/statistics'
 
 const countLabels: Record<string, string> = {
   total_tasks: 'Tâches',

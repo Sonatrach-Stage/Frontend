@@ -9,7 +9,7 @@ import {
   markAsRead,
   deleteNotification,
   type ApiNotification,
-} from '../../../api/notifications'
+} from '../../../services/notifications'
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()

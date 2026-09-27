@@ -4,8 +4,8 @@ import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
 import { getCurrentUser } from '../../../lib/auth'
-import { changePassword } from '../../../api/auth'
-import { getMyProfile, updateMyProfile, type MyProfile } from '../../../api/profile'
+import { changePassword } from '../../../services/auth'
+import { getMyProfile, updateMyProfile, type MyProfile } from '../../../services/profile'
 
 type ExtraFieldKey =
   | 'job'

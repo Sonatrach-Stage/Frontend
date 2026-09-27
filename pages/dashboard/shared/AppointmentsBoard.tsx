@@ -17,7 +17,7 @@ import {
   completeAppointment,
   type Appointment,
   type MeetingType,
-} from '../../../api/appointments'
+} from '../../../services/appointments'
 
 const statusBadge: Record<string, { text: string; className: string }> = {
   PENDING: { text: 'En attente', className: 'bg-amber-100 text-amber-700 hover:bg-amber-100' },

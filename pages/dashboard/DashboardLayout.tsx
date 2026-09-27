@@ -9,7 +9,7 @@ import { cn } from '../../lib/shadcn/utils'
 import { BrandLogo } from '../ui/BrandLogo'
 import { UserMenu } from './shared/UserMenu'
 import type { CurrentUser } from '../../lib/auth'
-import { getUnreadCount } from '../../api/notifications'
+import { getUnreadCount } from '../../services/notifications'
 
 export type NavItem = {
   label: string

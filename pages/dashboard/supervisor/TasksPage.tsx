@@ -12,7 +12,7 @@ import {
   updateSupervisorTask,
   deleteSupervisorTask,
   type ApiTask,
-} from '../../../api/tasksActivities'
+} from '../../../services/tasksActivities'
 
 const priorityColor: Record<string, string> = {
   high: 'text-red-600',

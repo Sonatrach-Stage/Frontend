@@ -8,7 +8,7 @@ import { Card } from '../lib/shadcn/card'
 import { Input } from '../lib/shadcn/input'
 import { Textarea } from '../lib/shadcn/textarea'
 import { AuthHeader } from './ui/AuthHeader'
-import { registerCompanyAdmin } from '../api/auth'
+import { registerCompanyAdmin } from '../services/auth'
 import type { SignupDraft } from './data/internPilotData'
 
 type AdminSignupPageProps = {

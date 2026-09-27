@@ -5,7 +5,7 @@ import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
 import { cn } from '../../../lib/shadcn/utils'
 import { connectSocket } from '../../../lib/socket'
-import { getOrCreateConversation, getConversationMessages, deleteMessage as apiDeleteMessage, type ChatMessage as ApiChatMessage } from '../../../api/chat'
+import { getOrCreateConversation, getConversationMessages, deleteMessage as apiDeleteMessage, type ChatMessage as ApiChatMessage } from '../../../services/chat'
 import { getCurrentUser } from '../../../lib/auth'
 
 export function ChatWindow({

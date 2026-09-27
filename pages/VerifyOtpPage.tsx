@@ -5,7 +5,7 @@ import { Button } from '../lib/shadcn/button'
 import { Card } from '../lib/shadcn/card'
 import { Input } from '../lib/shadcn/input'
 import { AuthHeader } from './ui/AuthHeader'
-import { verifyEmailOtp, resendOtp } from '../api/auth'
+import { verifyEmailOtp, resendOtp } from '../services/auth'
 import type { SignupDraft } from './data/internPilotData'
 
 type VerifyOtpPageProps = {

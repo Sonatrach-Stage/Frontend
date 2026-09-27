@@ -13,8 +13,8 @@ import {
   askAI, getDocumentSummary, getSimilarDocuments, compareDocuments,
   getMyAIConversations, getAIConversation, deleteAIConversation,
   type AIConversation, type AIMessage, type AISource,
-} from '../../../api/ai'
-import { getMyDocuments, type ApiDocument } from '../../../api/documents'
+} from '../../../services/ai'
+import { getMyDocuments, type ApiDocument } from '../../../services/documents'
 import { knowledgeDocs, allTags } from '../../data/aiKnowledgeData'
 
 type Tab = 'assistant' | 'documents' | 'knowledge' | 'insights'

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../../../lib/shadcn/card'
 import { BarBreakdown, MonthlyBarChart } from '../shared/StatCharts'
-import { getSuperAdminStatistics, type SuperAdminStatistics } from '../../../api/statistics'
+import { getSuperAdminStatistics, type SuperAdminStatistics } from '../../../services/statistics'
 
 const countLabels: Record<string, string> = {
   total_companies: 'Entreprises',

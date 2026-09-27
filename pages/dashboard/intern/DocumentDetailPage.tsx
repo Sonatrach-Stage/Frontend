@@ -14,7 +14,7 @@ import {
   type ApiDocument,
   type DocumentVersion,
   type DocumentReview,
-} from '../../../api/documents'
+} from '../../../services/documents'
 
 const statusLabel: Record<string, { text: string; color: string }> = {
   PENDING: { text: 'En attente de review', color: 'text-amber-600' },

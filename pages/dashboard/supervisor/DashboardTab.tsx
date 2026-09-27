@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../../../lib/shadcn/card'
 import { BarBreakdown, MonthlyBarChart } from '../shared/StatCharts'
-import { getSupervisorStatistics, type SupervisorStatistics } from '../../../api/statistics'
+import { getSupervisorStatistics, type SupervisorStatistics } from '../../../services/statistics'
 
 const countLabels: Record<string, string> = {
   total_interns: 'Stagiaires',

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { assignSupervisorToIntern } from '../../../api/adminsec'
+import { assignSupervisorToIntern } from '../../../services/adminsec'
 import { ArrowRight, Check } from 'lucide-react'
 
 import { Button } from '../../../lib/shadcn/button'

@@ -5,7 +5,7 @@ import { Card } from '../../../lib/shadcn/card'
 import { Button } from '../../../lib/shadcn/button'
 import { Textarea } from '../../../lib/shadcn/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../lib/shadcn/select'
-import { getPendingDocuments, reviewDocument, type PendingDocument } from '../../../api/documents'
+import { getPendingDocuments, reviewDocument, type PendingDocument } from '../../../services/documents'
 
 export default function DocumentsPage() {
   const [documents, setDocuments] = useState<PendingDocument[]>([])

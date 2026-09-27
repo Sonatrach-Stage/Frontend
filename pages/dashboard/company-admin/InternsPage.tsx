@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Badge } from '../../../lib/shadcn/badge'
 import { Card } from '../../../lib/shadcn/card'
 import { cn } from '../../../lib/shadcn/utils'
-import { getActiveInterns, getDeactivatedInterns, type ActiveIntern } from '../../../api/adminsec'
+import { getActiveInterns, getDeactivatedInterns, type ActiveIntern } from '../../../services/adminsec'
 
 export default function InternsPage() {
   const [tab, setTab] = useState<'Actifs' | 'Désactivés'>('Actifs')

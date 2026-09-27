@@ -9,7 +9,7 @@ import { Textarea } from '../../../lib/shadcn/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../lib/shadcn/select'
 import { cn } from '../../../lib/shadcn/utils'
 import { getCurrentUser } from '../../../lib/auth'
-import { createDocument, addDocumentVersion, getMyDocuments, searchDocuments, type ApiDocument, type PendingDocument } from '../../../api/documents'
+import { createDocument, addDocumentVersion, getMyDocuments, searchDocuments, type ApiDocument, type PendingDocument } from '../../../services/documents'
 
 const statusLabel: Record<string, { text: string; color: string }> = {
   PENDING: { text: 'En attente de review', color: 'text-amber-600' },

@@ -5,7 +5,7 @@ import { Button } from '../lib/shadcn/button'
 import { Card } from '../lib/shadcn/card'
 import { Input } from '../lib/shadcn/input'
 import { AuthHeader } from './ui/AuthHeader'
-import { forgotPassword, verifyResetOtp, resetPassword } from '../api/auth'
+import { forgotPassword, verifyResetOtp, resetPassword } from '../services/auth'
 
 type Step = 'email' | 'otp' | 'password' | 'done'
 

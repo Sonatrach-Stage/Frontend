@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button } from '../../../lib/shadcn/button'
 import { Card } from '../../../lib/shadcn/card'
 import { Badge } from '../../../lib/shadcn/badge'
-import { getPendingCompanies, approveCompany, rejectCompany, type ApiCompany } from '../../../api/adminsup'
+import { getPendingCompanies, approveCompany, rejectCompany, type ApiCompany } from '../../../services/adminsup'
 
 export default function RequestsPage() {
   const [companies, setCompanies] = useState<ApiCompany[]>([])

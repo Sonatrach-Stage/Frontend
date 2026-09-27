@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../../../lib/shadcn/card'
-import { getInternActivities, type ApiActivity } from '../../../api/tasksActivities'
+import { getInternActivities, type ApiActivity } from '../../../services/tasksActivities'
 
 export default function MyActivitiesPage() {
   const [activities, setActivities] = useState<ApiActivity[]>([])

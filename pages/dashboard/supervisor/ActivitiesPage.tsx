@@ -10,7 +10,7 @@ import {
   updateSupervisorActivity,
   deleteSupervisorActivity,
   type ApiActivity,
-} from '../../../api/tasksActivities'
+} from '../../../services/tasksActivities'
 
 export default function ActivitiesPage() {
   const [activities, setActivities] = useState<ApiActivity[]>([])

@@ -3,7 +3,7 @@ import { Card } from '../../../lib/shadcn/card'
 import { Badge } from '../../../lib/shadcn/badge'
 import { Button } from '../../../lib/shadcn/button'
 import { cn } from '../../../lib/shadcn/utils'
-import { getPendingInterns, approveIntern, rejectIntern, type PendingIntern } from '../../../api/adminsec'
+import { getPendingInterns, approveIntern, rejectIntern, type PendingIntern } from '../../../services/adminsec'
 
 export default function ValidationsPage() {
   const [tab, setTab] = useState<'Stagiaire' | 'Encadrant'>('Stagiaire')

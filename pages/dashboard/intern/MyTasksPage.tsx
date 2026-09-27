@@ -12,7 +12,7 @@ import {
   updateInternTask,
   deleteInternTask,
   type ApiTask,
-} from '../../../api/tasksActivities'
+} from '../../../services/tasksActivities'
 
 export default function MyTasksPage() {
   const [tasks, setTasks] = useState<ApiTask[]>([])

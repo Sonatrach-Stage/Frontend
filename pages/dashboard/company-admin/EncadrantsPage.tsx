@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Card } from '../../../lib/shadcn/card'
 import { cn } from '../../../lib/shadcn/utils'
-import { getActiveSupervisors, getDeactivatedSupervisors, type ActiveSupervisor } from '../../../api/adminsec'
+import { getActiveSupervisors, getDeactivatedSupervisors, type ActiveSupervisor } from '../../../services/adminsec'
 
 export default function EncadrantsPage() {
   const [tab, setTab] = useState<'Actifs' | 'Désactivés'>('Actifs')

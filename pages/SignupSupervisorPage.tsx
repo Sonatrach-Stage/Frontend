@@ -6,8 +6,8 @@ import { Card } from '../lib/shadcn/card'
 import type { SignupDraft } from './data/internPilotData'
 import { AuthHeader } from './ui/AuthHeader'
 import { StepIndicator } from './ui/StepIndicator'
-import { registerSupervisor } from '../api/auth'
-import { getApprovedCompaniesPublic, type PublicCompany } from '../api/companies'
+import { registerSupervisor } from '../services/auth'
+import { getApprovedCompaniesPublic, type PublicCompany } from '../services/companies'
 
 type SignupSupervisorPageProps = {
   draft: SignupDraft

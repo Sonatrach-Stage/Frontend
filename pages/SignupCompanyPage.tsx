@@ -9,8 +9,8 @@ import { cn } from '../lib/shadcn/utils'
 import type { SignupDraft } from './data/internPilotData'
 import { AuthHeader } from './ui/AuthHeader'
 import { StepIndicator } from './ui/StepIndicator'
-import { registerIntern } from '../api/auth'
-import { getApprovedCompaniesPublic, type PublicCompany } from '../api/companies'
+import { registerIntern } from '../services/auth'
+import { getApprovedCompaniesPublic, type PublicCompany } from '../services/companies'
 
 type SignupCompanyPageProps = {
   draft: SignupDraft

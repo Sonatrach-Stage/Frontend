@@ -4,7 +4,7 @@ import { Badge } from '../../../lib/shadcn/badge'
 import { Button } from '../../../lib/shadcn/button'
 import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
-import { getAllCompanies, approveCompany, rejectCompany, deleteCompany, type ApiCompany } from '../../../api/adminsup'
+import { getAllCompanies, approveCompany, rejectCompany, deleteCompany, type ApiCompany } from '../../../services/adminsup'
 
 const statusColor: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-700 hover:bg-amber-100',
