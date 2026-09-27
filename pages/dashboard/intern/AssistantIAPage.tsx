@@ -1,54 +1,39 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Bot, Send, Sparkles, Search, FileText, Layers,
-  TrendingUp, ExternalLink, MessageSquarePlus, Copy, ThumbsUp, ThumbsDown,
+  TrendingUp, ExternalLink, Plus, Trash2, GitCompare,
 } from 'lucide-react'
 import { Card } from '../../../lib/shadcn/card'
 import { Input } from '../../../lib/shadcn/input'
 import { Button } from '../../../lib/shadcn/button'
 import { Badge } from '../../../lib/shadcn/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../lib/shadcn/select'
 import { cn } from '../../../lib/shadcn/utils'
 import {
-  knowledgeDocs, allTags, stageLinkDocDetail, demoChatAnswers, defaultChatAnswer,
-  type KnowledgeDoc,
-} from '../../data/aiKnowledgeData'
+  askAI, getDocumentSummary, getSimilarDocuments, compareDocuments,
+  getMyAIConversations, getAIConversation, deleteAIConversation,
+  type AIConversation, type AIMessage, type AISource,
+} from '../../../api/ai'
+import { getMyDocuments, type ApiDocument } from '../../../api/documents'
+import { knowledgeDocs, allTags } from '../../data/aiKnowledgeData'
 
-type Tab = 'assistant' | 'knowledge' | 'document' | 'similar' | 'insights'
+type Tab = 'assistant' | 'documents' | 'knowledge' | 'insights'
 
 const tabs: { id: Tab; label: string; icon: typeof Bot }[] = [
   { id: 'assistant', label: 'Assistant IA', icon: Bot },
+  { id: 'documents', label: 'Mes documents (IA)', icon: FileText },
   { id: 'knowledge', label: 'Bibliothèque', icon: Layers },
-  { id: 'document', label: 'Analyse de document', icon: FileText },
-  { id: 'similar', label: 'Projets similaires', icon: Search },
   { id: 'insights', label: 'Insights', icon: TrendingUp },
 ]
-
-const suggestions = [
-  { title: 'Trouver des projets liés à mon sujet', sub: 'Réponse sourcée depuis les mémoires indexés' },
-  { title: 'Résumer un mémoire', sub: 'Réponse sourcée depuis les mémoires indexés' },
-  { title: 'Quels projets ont utilisé Docker ?', sub: 'Réponse sourcée depuis les mémoires indexés' },
-  { title: 'Comparer deux projets', sub: 'Réponse sourcée depuis les mémoires indexés' },
-]
-
-type Message = {
-  role: 'user' | 'ai'
-  text: string
-  sources?: { title: string; author: string; chapter: string; docId: string }[]
-}
 
 export default function AssistantIAPage() {
   const [tab, setTab] = useState<Tab>('assistant')
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">StageLink AI</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Votre assistant intelligent pour la connaissance des stages.</p>
-        </div>
-        <Badge className="rounded-full bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))] hover:bg-[rgb(var(--intern-soft-blue))] dark:bg-secondary dark:text-foreground">
-          Prototype de démonstration — données fictives
-        </Badge>
+      <div className="mb-6">
+        <h1 className="text-3xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">StageLink AI</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Votre assistant intelligent pour la connaissance des stages.</p>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2 border-b pb-3">
@@ -71,143 +56,436 @@ export default function AssistantIAPage() {
         })}
       </div>
 
-      {tab === 'assistant' && <AssistantTab onOpenDoc={() => setTab('document')} />}
+      {tab === 'assistant' && <AssistantTab />}
+      {tab === 'documents' && <DocumentAnalysisTab />}
       {tab === 'knowledge' && <KnowledgeTab />}
-      {tab === 'document' && <DocumentTab />}
-      {tab === 'similar' && <SimilarProjectsTab />}
       {tab === 'insights' && <InsightsTab />}
     </>
   )
 }
 
-// ============== ASSISTANT ==============
+// ============== ASSISTANT (réel, /ai/ask + conversations) ==============
 
-function AssistantTab({ onOpenDoc }: { onOpenDoc: () => void }) {
-  const [messages, setMessages] = useState<Message[]>([])
+function AssistantTab() {
+  const [conversations, setConversations] = useState<AIConversation[]>([])
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(null)
+  const [messages, setMessages] = useState<AIMessage[]>([])
+  const [sourcesByMessage, setSourcesByMessage] = useState<Record<number, AISource[]>>({})
   const [draft, setDraft] = useState('')
+  const [loadingList, setLoadingList] = useState(true)
+  const [loadingConv, setLoadingConv] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
 
-  function send(text?: string) {
-    const content = (text ?? draft).trim()
-    if (!content) return
-
-    const match = demoChatAnswers.find((entry) => entry.keywords.some((k) => content.toLowerCase().includes(k)))
-    const response = match ?? defaultChatAnswer
-
-    setMessages((cur) => [
-      ...cur,
-      { role: 'user', text: content },
-      { role: 'ai', text: response.answer, sources: response.sources },
-    ])
-    setDraft('')
+  function loadConversations() {
+    setLoadingList(true)
+    getMyAIConversations()
+      .then((res) => setConversations(res.conversations))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .finally(() => setLoadingList(false))
   }
 
-  if (messages.length === 0) {
-    return (
-      <div className="mx-auto max-w-3xl text-center">
-        <Badge variant="outline" className="rounded-full text-[rgb(var(--intern-blue))]">Recherche sémantique</Badge>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          {suggestions.map((s) => (
-            <button key={s.title} type="button" onClick={() => send(s.title)} className="text-left">
-              <Card className="rounded-2xl p-5 shadow-retool-sm transition-colors hover:border-[rgb(var(--intern-blue))]">
-                <p className="font-bold text-foreground">{s.title}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{s.sub}</p>
-              </Card>
-            </button>
-          ))}
-        </div>
+  useEffect(() => {
+    loadConversations()
+  }, [])
 
-        <div className="mt-8 flex items-center gap-2 rounded-2xl border bg-card p-2 shadow-sm">
-          <Bot className="ml-2 h-5 w-5 text-[rgb(var(--intern-blue))]" />
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && send()}
-            placeholder="Posez votre question à StageLink AI..."
-            className="h-11 border-none shadow-none focus-visible:ring-0"
-          />
-          <Button className="rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={() => send()}>
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    )
+  async function openConversation(id: number) {
+    setActiveConversationId(id)
+    setLoadingConv(true)
+    setError('')
+    try {
+      const res = await getAIConversation(id)
+      setMessages(res.messages)
+      setSourcesByMessage({})
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur de chargement de la conversation')
+    } finally {
+      setLoadingConv(false)
+    }
+  }
+
+  function startNewConversation() {
+    setActiveConversationId(null)
+    setMessages([])
+    setSourcesByMessage({})
+  }
+
+  async function handleDeleteConversation(id: number) {
+    if (!confirm('Supprimer cette conversation ?')) return
+    try {
+      await deleteAIConversation(id)
+      setConversations((cur) => cur.filter((c) => c.id !== id))
+      if (activeConversationId === id) startNewConversation()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la suppression')
+    }
+  }
+
+  async function send() {
+    const question = draft.trim()
+    if (!question) return
+    setSending(true)
+    setError('')
+
+    const optimisticUserMsg: AIMessage = {
+      id: Date.now(),
+      conversation_id: activeConversationId ?? 0,
+      role: 'user',
+      content: question,
+      created_at: new Date().toISOString(),
+    }
+    setMessages((cur) => [...cur, optimisticUserMsg])
+    setDraft('')
+
+    try {
+      const res = await askAI(question, activeConversationId ?? undefined)
+      const aiMsg: AIMessage = {
+        id: Date.now() + 1,
+        conversation_id: res.conversation.id,
+        role: 'assistant',
+        content: res.answer,
+        created_at: new Date().toISOString(),
+      }
+      setMessages((cur) => [...cur, aiMsg])
+      setSourcesByMessage((cur) => ({ ...cur, [aiMsg.id]: res.sources }))
+
+      if (!activeConversationId) {
+        setActiveConversationId(res.conversation.id)
+        loadConversations()
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'envoi de la question")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <Card className="flex h-[560px] flex-col rounded-3xl shadow-retool-sm">
-        <div className="flex-1 space-y-4 overflow-y-auto p-6">
-          {messages.map((m, i) => (
-            <div key={i} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
-              <div
-                className={cn(
-                  'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
-                  m.role === 'user'
-                    ? 'bg-[rgb(var(--intern-navy))] text-white'
-                    : 'bg-[rgb(var(--intern-soft-blue))] text-foreground dark:bg-secondary',
-                )}
+    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <Card className="h-fit rounded-2xl p-3 shadow-retool-sm">
+        <Button className="w-full rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={startNewConversation}>
+          <Plus className="h-4 w-4" /> Nouvelle conversation
+        </Button>
+
+        <p className="mb-1 mt-4 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Conversations</p>
+        {loadingList && <p className="px-2 text-xs text-muted-foreground">Chargement...</p>}
+        <div className="space-y-1">
+          {conversations.map((c) => (
+            <div
+              key={c.id}
+              className={cn(
+                'group flex items-center gap-1 rounded-xl px-2 py-1',
+                activeConversationId === c.id && 'bg-[rgb(var(--intern-soft-blue))]',
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => openConversation(c.id)}
+                className="min-w-0 flex-1 truncate rounded-lg px-1.5 py-1.5 text-left text-xs font-semibold text-foreground hover:bg-muted"
               >
-                {m.role === 'ai' && (
-                  <p className="mb-1 flex items-center gap-1.5 text-xs font-bold text-[rgb(var(--intern-blue))]">
-                    <Sparkles className="h-3.5 w-3.5" /> StageLink AI
-                  </p>
-                )}
-                <p className="whitespace-pre-line leading-6">{m.text}</p>
-
-                {m.sources && (
-                  <div className="mt-3 space-y-2 border-t border-black/10 pt-3">
-                    <p className="text-xs font-bold text-muted-foreground">Sources</p>
-                    {m.sources.map((s) => (
-                      <button
-                        key={s.docId + s.chapter}
-                        type="button"
-                        onClick={onOpenDoc}
-                        className="block w-full rounded-xl bg-card p-2.5 text-left text-xs shadow-sm hover:border-[rgb(var(--intern-blue))]"
-                      >
-                        <p className="font-bold text-foreground">« {s.title} »</p>
-                        <p className="text-muted-foreground">{s.author} — {s.chapter}</p>
-                        <p className="mt-1 flex items-center gap-1 font-semibold text-[rgb(var(--intern-blue))]">
-                          Ouvrir la source <ExternalLink className="h-3 w-3" />
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {m.role === 'ai' && (
-                  <div className="mt-3 flex items-center gap-3 text-muted-foreground">
-                    <button type="button" className="hover:text-foreground"><Copy className="h-3.5 w-3.5" /></button>
-                    <button type="button" className="hover:text-foreground"><MessageSquarePlus className="h-3.5 w-3.5" /></button>
-                    <button type="button" className="hover:text-emerald-600"><ThumbsUp className="h-3.5 w-3.5" /></button>
-                    <button type="button" className="hover:text-red-600"><ThumbsDown className="h-3.5 w-3.5" /></button>
-                  </div>
-                )}
-              </div>
+                {c.title}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteConversation(c.id)}
+                className="shrink-0 rounded-full p-1 opacity-0 group-hover:opacity-100 hover:bg-muted"
+                aria-label="Supprimer"
+              >
+                <Trash2 className="h-3 w-3 text-muted-foreground hover:text-red-600" />
+              </button>
             </div>
           ))}
-        </div>
-        <div className="flex items-center gap-2 border-t p-4">
-          <Bot className="h-5 w-5 text-[rgb(var(--intern-blue))]" />
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && send()}
-            placeholder="Ask StageLink AI..."
-            className="h-10 rounded-xl"
-          />
-          <Button className="rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={() => send()}>
-            <Send className="h-4 w-4" />
-          </Button>
+          {!loadingList && conversations.length === 0 && (
+            <p className="px-2 text-xs text-muted-foreground">Aucune conversation.</p>
+          )}
         </div>
       </Card>
-      <p className="mt-3 text-center text-xs text-muted-foreground">
-        Réponses générées à partir des mémoires indexés — chaque affirmation renvoie à sa source.
-      </p>
+
+      <div>
+        {messages.length === 0 && !loadingConv ? (
+          <div className="mx-auto max-w-2xl text-center">
+            <Badge variant="outline" className="rounded-full text-[rgb(var(--intern-blue))]">Recherche documentaire</Badge>
+            <h2 className="mt-4 text-2xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">StageLink AI</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Posez une question sur les documents de votre entreprise.
+            </p>
+            <div className="mt-8 flex items-center gap-2 rounded-2xl border bg-card p-2 shadow-sm">
+              <Bot className="ml-2 h-5 w-5 text-[rgb(var(--intern-blue))]" />
+              <Input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && send()}
+                placeholder="Ex. Quel est le statut du module de paiement ?"
+                className="h-11 border-none shadow-none focus-visible:ring-0"
+              />
+              <Button disabled={sending} className="rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={send}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
+          </div>
+        ) : (
+          <Card className="flex h-[560px] flex-col rounded-3xl shadow-retool-sm">
+            <div className="flex-1 space-y-4 overflow-y-auto p-6">
+              {loadingConv && <p className="text-center text-sm text-muted-foreground">Chargement...</p>}
+              {!loadingConv && messages.map((m) => (
+                <div key={m.id} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div
+                    className={cn(
+                      'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
+                      m.role === 'user'
+                        ? 'bg-[rgb(var(--intern-navy))] text-white'
+                        : 'bg-[rgb(var(--intern-soft-blue))] text-foreground dark:bg-secondary',
+                    )}
+                  >
+                    {m.role === 'assistant' && (
+                      <p className="mb-1 flex items-center gap-1.5 text-xs font-bold text-[rgb(var(--intern-blue))]">
+                        <Sparkles className="h-3.5 w-3.5" /> StageLink AI
+                      </p>
+                    )}
+                    <p className="whitespace-pre-line leading-6">{m.content}</p>
+
+                    {sourcesByMessage[m.id] && sourcesByMessage[m.id].length > 0 && (
+                      <div className="mt-3 space-y-2 border-t border-black/10 pt-3">
+                        <p className="text-xs font-bold text-muted-foreground">Sources</p>
+                        {sourcesByMessage[m.id].map((s) => (
+                          <div key={s.document_id} className="rounded-xl bg-card p-2.5 text-xs shadow-sm">
+                            <p className="font-bold text-foreground">{s.title}</p>
+                            {s.excerpt && <p className="mt-1 text-muted-foreground">{s.excerpt}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {error && <p className="mx-4 mb-2 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{error}</p>}
+            <div className="flex items-center gap-2 border-t p-4">
+              <Bot className="h-5 w-5 text-[rgb(var(--intern-blue))]" />
+              <Input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && send()}
+                placeholder="Ask StageLink AI..."
+                className="h-10 rounded-xl"
+              />
+              <Button disabled={sending} className="rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={send}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }
 
-// ============== KNOWLEDGE LIBRARY ==============
+// ============== ANALYSE DE DOCUMENTS (réel : résumé / similaires / comparer) ==============
+
+function DocumentAnalysisTab() {
+  const [documents, setDocuments] = useState<ApiDocument[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [compareId, setCompareId] = useState<number | null>(null)
+
+  const [summary, setSummary] = useState<{ summary: string; keyPoints: string[] } | null>(null)
+  const [similar, setSimilar] = useState<{ document_id: number; title: string; similarity_score: number }[] | null>(null)
+  const [comparison, setComparison] = useState<{ comparison: string; similarities: string[]; differences: string[] } | null>(null)
+
+  const [loadingAction, setLoadingAction] = useState<'summary' | 'similar' | 'compare' | null>(null)
+  const [actionError, setActionError] = useState('')
+
+  useEffect(() => {
+    getMyDocuments()
+      .then((res) => setDocuments(res.documents))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  function selectDocument(id: number) {
+    setSelectedId(id)
+    setSummary(null)
+    setSimilar(null)
+    setComparison(null)
+    setActionError('')
+  }
+
+  async function handleSummarize() {
+    if (!selectedId) return
+    setLoadingAction('summary')
+    setActionError('')
+    try {
+      const res = await getDocumentSummary(selectedId)
+      setSummary({ summary: res.summary, keyPoints: res.keyPoints })
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Erreur lors de la génération du résumé')
+    } finally {
+      setLoadingAction(null)
+    }
+  }
+
+  async function handleFindSimilar() {
+    if (!selectedId) return
+    setLoadingAction('similar')
+    setActionError('')
+    try {
+      const res = await getSimilarDocuments(selectedId)
+      setSimilar(res.similarProjects)
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Erreur lors de la recherche de projets similaires')
+    } finally {
+      setLoadingAction(null)
+    }
+  }
+
+  async function handleCompare() {
+    if (!selectedId || !compareId) return
+    setLoadingAction('compare')
+    setActionError('')
+    try {
+      const res = await compareDocuments(selectedId, compareId)
+      setComparison({ comparison: res.comparison, similarities: res.similarities, differences: res.differences })
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Erreur lors de la comparaison')
+    } finally {
+      setLoadingAction(null)
+    }
+  }
+
+  const selectedDoc = documents.find((d) => d.id === selectedId)
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <Card className="h-fit rounded-2xl p-3 shadow-retool-sm">
+        <p className="mb-2 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Mes documents</p>
+        {loading && <p className="px-2 text-xs text-muted-foreground">Chargement...</p>}
+        {error && <p className="px-2 text-xs text-red-600">{error}</p>}
+        {!loading && documents.map((doc) => (
+          <button
+            key={doc.id}
+            type="button"
+            onClick={() => selectDocument(doc.id)}
+            className={cn(
+              'block w-full rounded-xl px-3 py-2 text-left text-xs font-semibold hover:bg-muted',
+              selectedId === doc.id && 'bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))]',
+            )}
+          >
+            {doc.title}
+          </button>
+        ))}
+        {!loading && documents.length === 0 && (
+          <p className="px-2 text-xs text-muted-foreground">Aucun document. Créez-en un dans « Mes documents ».</p>
+        )}
+      </Card>
+
+      <div>
+        {!selectedDoc ? (
+          <Card className="rounded-2xl border-dashed p-10 text-center text-sm text-muted-foreground">
+            Sélectionnez un document pour l'analyser avec l'IA.
+          </Card>
+        ) : (
+          <>
+            <div className="mb-4">
+              <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{selectedDoc.title}</h2>
+              <p className="text-sm text-muted-foreground">{selectedDoc.document_type}</p>
+            </div>
+
+            {actionError && <p className="mb-4 rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-600">{actionError}</p>}
+
+            <Card className="mb-6 rounded-2xl p-5 shadow-retool-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[rgb(var(--intern-blue))]" />
+                  <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Résumé IA</h3>
+                </div>
+                <Button size="sm" disabled={loadingAction === 'summary'} className="rounded-lg bg-[rgb(var(--intern-navy))] text-white" onClick={handleSummarize}>
+                  {loadingAction === 'summary' ? 'Génération...' : summary ? 'Régénérer' : 'Générer le résumé'}
+                </Button>
+              </div>
+              {summary && (
+                <>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{summary.summary}</p>
+                  {summary.keyPoints.length > 0 && (
+                    <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+                      {summary.keyPoints.map((p) => <li key={p}>• {p}</li>)}
+                    </ul>
+                  )}
+                </>
+              )}
+            </Card>
+
+            <Card className="mb-6 rounded-2xl p-5 shadow-retool-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Search className="h-4 w-4 text-[rgb(var(--intern-blue))]" />
+                  <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Projets similaires</h3>
+                </div>
+                <Button size="sm" disabled={loadingAction === 'similar'} className="rounded-lg bg-[rgb(var(--intern-navy))] text-white" onClick={handleFindSimilar}>
+                  {loadingAction === 'similar' ? 'Recherche...' : 'Rechercher'}
+                </Button>
+              </div>
+              {similar && (
+                <div className="mt-3 space-y-2">
+                  {similar.map((s) => (
+                    <div key={s.document_id} className="flex items-center justify-between rounded-xl border bg-background/70 p-3 text-sm">
+                      <span className="font-semibold text-foreground">{s.title}</span>
+                      <Badge variant="outline" className="rounded-full">{Math.round(s.similarity_score * 100)}%</Badge>
+                    </div>
+                  ))}
+                  {similar.length === 0 && <p className="mt-2 text-sm text-muted-foreground">Aucun document similaire trouvé.</p>}
+                </div>
+              )}
+            </Card>
+
+            <Card className="rounded-2xl p-5 shadow-retool-sm">
+              <div className="flex items-center gap-2">
+                <GitCompare className="h-4 w-4 text-[rgb(var(--intern-blue))]" />
+                <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Comparer avec un autre document</h3>
+              </div>
+              <div className="mt-3 flex gap-2">
+                <Select value={compareId ? String(compareId) : ''} onValueChange={(v) => setCompareId(Number(v))}>
+                  <SelectTrigger className="h-10 rounded-xl"><SelectValue placeholder="Choisir un document" /></SelectTrigger>
+                  <SelectContent>
+                    {documents.filter((d) => d.id !== selectedId).map((d) => (
+                      <SelectItem key={d.id} value={String(d.id)}>{d.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button disabled={!compareId || loadingAction === 'compare'} className="rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={handleCompare}>
+                  {loadingAction === 'compare' ? '...' : 'Comparer'}
+                </Button>
+              </div>
+              {comparison && (
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm leading-6 text-muted-foreground">{comparison.comparison}</p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Similitudes</p>
+                      <ul className="mt-1.5 space-y-1 text-sm text-muted-foreground">
+                        {comparison.similarities.map((s) => <li key={s}>• {s}</li>)}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Différences</p>
+                      <ul className="mt-1.5 space-y-1 text-sm text-muted-foreground">
+                        {comparison.differences.map((d) => <li key={d}>• {d}</li>)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============== BIBLIOTHÈQUE (démo — aucune route de parcours documentaire entreprise dans le swagger) ==============
 
 function KnowledgeTab() {
   const [search, setSearch] = useState('')
@@ -226,7 +504,10 @@ function KnowledgeTab() {
 
   return (
     <>
-      <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Bibliothèque de connaissances</h2>
+      <div className="mb-1 flex items-center gap-2">
+        <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Bibliothèque de connaissances</h2>
+        <Badge variant="outline" className="rounded-full text-xs">Démo</Badge>
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">Explorez la connaissance produite par les stages précédents.</p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -258,11 +539,7 @@ function KnowledgeTab() {
                 ))}
               </div>
               {activeTags.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setActiveTags([])}
-                  className="mt-3 text-xs font-semibold text-[rgb(var(--intern-blue))] hover:underline"
-                >
+                <button type="button" onClick={() => setActiveTags([])} className="mt-3 text-xs font-semibold text-[rgb(var(--intern-blue))] hover:underline">
                   Effacer les filtres
                 </button>
               )}
@@ -274,11 +551,7 @@ function KnowledgeTab() {
       {activeTags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {activeTags.map((tag) => (
-            <Badge
-              key={tag}
-              className="cursor-pointer rounded-full bg-[rgb(var(--intern-navy))] text-white hover:bg-[rgb(var(--intern-navy))]"
-              onClick={() => toggleTag(tag)}
-            >
+            <Badge key={tag} className="cursor-pointer rounded-full bg-[rgb(var(--intern-navy))] text-white hover:bg-[rgb(var(--intern-navy))]" onClick={() => toggleTag(tag)}>
               {tag} ×
             </Badge>
           ))}
@@ -297,9 +570,7 @@ function KnowledgeTab() {
             <p className="mt-1 text-xs text-muted-foreground">{doc.author} · {doc.year} · {doc.domain}</p>
             <p className="mt-2 text-sm text-muted-foreground">{doc.description}</p>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {doc.technologies.map((t) => (
-                <Badge key={t} variant="outline" className="rounded-full text-[10px]">{t}</Badge>
-              ))}
+              {doc.technologies.map((t) => <Badge key={t} variant="outline" className="rounded-full text-[10px]">{t}</Badge>)}
             </div>
           </Card>
         ))}
@@ -313,151 +584,7 @@ function KnowledgeTab() {
   )
 }
 
-// ============== DOCUMENT INTELLIGENCE ==============
-
-function DocumentTab() {
-  const [selected, setSelected] = useState<KnowledgeDoc>(knowledgeDocs.find((d) => d.id === 'doc-stagelink') ?? knowledgeDocs[0])
-
-  return (
-    <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-      <Card className="h-fit rounded-2xl p-3 shadow-retool-sm">
-        <p className="mb-2 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Documents</p>
-        {knowledgeDocs.map((doc) => (
-          <button
-            key={doc.id}
-            type="button"
-            onClick={() => setSelected(doc)}
-            className={cn(
-              'block w-full rounded-xl px-3 py-2 text-left text-xs font-semibold hover:bg-muted',
-              selected.id === doc.id && 'bg-[rgb(var(--intern-soft-blue))] text-[rgb(var(--intern-navy))]',
-            )}
-          >
-            {doc.title}
-          </button>
-        ))}
-      </Card>
-
-      <div>
-        <div className="mb-4">
-          <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{selected.title}</h2>
-          <p className="text-sm text-muted-foreground">{selected.author} · {selected.type} · {selected.year}</p>
-        </div>
-
-        {selected.id === 'doc-stagelink' ? (
-          <>
-            <Card className="mb-6 rounded-2xl p-5 shadow-retool-sm">
-              <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Structure du document</h3>
-              <ol className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                {stageLinkDocDetail.chapters.map((c, i) => (
-                  <li key={c.title}>{i + 1}. {c.title}</li>
-                ))}
-              </ol>
-            </Card>
-
-            <Card className="mb-6 rounded-2xl p-5 shadow-retool-sm">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[rgb(var(--intern-blue))]" />
-                <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Résumé généré par IA</h3>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{stageLinkDocDetail.summary.executive}</p>
-
-              <SummaryList title="Objectifs" items={stageLinkDocDetail.summary.objectives} />
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {selected.technologies.map((t) => <Badge key={t} variant="outline" className="rounded-full">{t}</Badge>)}
-              </div>
-              <SummaryList title="Résultats clés" items={stageLinkDocDetail.summary.results} />
-              <SummaryList title="Limites" items={stageLinkDocDetail.summary.limits} />
-              <SummaryList title="Perspectives" items={stageLinkDocDetail.summary.perspectives} />
-            </Card>
-
-            <Card className="rounded-2xl p-5 shadow-retool-sm">
-              <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Chapitre : Introduction</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{stageLinkDocDetail.chapters[0].summary}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {['Résumer le chapitre 4', 'Quelles technologies ont été utilisées ?', "Quel est l'objectif principal ?", 'Quelles sont les limites ?'].map((q) => (
-                  <Badge key={q} variant="outline" className="cursor-pointer rounded-full hover:bg-muted">{q}</Badge>
-                ))}
-              </div>
-            </Card>
-          </>
-        ) : (
-          <Card className="rounded-2xl border-dashed p-10 text-center text-sm text-muted-foreground">
-            Aperçu détaillé disponible uniquement pour le document de démonstration « {knowledgeDocs.find((d) => d.id === 'doc-stagelink')?.title} ».
-          </Card>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function SummaryList({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="mt-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{title}</p>
-      <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
-        {items.map((item) => <li key={item}>• {item}</li>)}
-      </ul>
-    </div>
-  )
-}
-
-// ============== SIMILAR PROJECTS ==============
-
-function SimilarProjectsTab() {
-  const reference = knowledgeDocs.find((d) => d.id === 'doc-stagelink') ?? knowledgeDocs[0]
-  const others = knowledgeDocs.filter((d) => d.id !== reference.id)
-
-  function similarityScore(doc: KnowledgeDoc) {
-    const shared = doc.technologies.filter((t) => reference.technologies.includes(t)).length
-    return Math.min(95, 40 + shared * 15)
-  }
-
-  const ranked = [...others].sort((a, b) => similarityScore(b) - similarityScore(a))
-
-  return (
-    <>
-      <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Projets similaires</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Basé sur : « {reference.title} » ({reference.author}, {reference.year})
-      </p>
-
-      <div className="mt-5 space-y-3">
-        {ranked.map((doc) => {
-          const score = similarityScore(doc)
-          return (
-            <Card key={doc.id} className="rounded-2xl p-5 shadow-retool-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{doc.title}</p>
-                  <p className="text-xs text-muted-foreground">{doc.author} · {doc.type} · {doc.year}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-[rgb(var(--intern-blue))]" style={{ width: `${score}%` }} />
-                  </div>
-                  <span className="text-xs font-bold text-[rgb(var(--intern-navy))] dark:text-foreground">{score}%</span>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {doc.technologies.map((t) => (
-                  <Badge
-                    key={t}
-                    variant="outline"
-                    className={cn('rounded-full text-[10px]', reference.technologies.includes(t) && 'border-[rgb(var(--intern-blue))] text-[rgb(var(--intern-blue))]')}
-                  >
-                    {t}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
-          )
-        })}
-      </div>
-    </>
-  )
-}
-
-// ============== INSIGHTS ==============
+// ============== INSIGHTS (démo) ==============
 
 function InsightsTab() {
   const domainCounts = knowledgeDocs.reduce<Record<string, number>>((acc, d) => {
@@ -478,7 +605,10 @@ function InsightsTab() {
 
   return (
     <>
-      <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">AI Insights</h2>
+      <div className="mb-1 flex items-center gap-2">
+        <h2 className="text-xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">AI Insights</h2>
+        <Badge variant="outline" className="rounded-full text-xs">Démo</Badge>
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">Tendances observées dans la base de connaissances.</p>
 
       <div className="mt-5 grid gap-6 lg:grid-cols-2">
@@ -507,28 +637,6 @@ function InsightsTab() {
                 {tech} · {count}
               </Badge>
             ))}
-          </div>
-        </Card>
-
-        <Card className="rounded-2xl p-6 shadow-retool-sm lg:col-span-2">
-          <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Chiffres clés</h3>
-          <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="rounded-xl bg-background/70 p-4 text-center">
-              <p className="text-2xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{knowledgeDocs.length}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Documents indexés</p>
-            </div>
-            <div className="rounded-xl bg-background/70 p-4 text-center">
-              <p className="text-2xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{knowledgeDocs.filter((d) => d.type === 'PFE').length}</p>
-              <p className="mt-1 text-xs text-muted-foreground">PFE</p>
-            </div>
-            <div className="rounded-xl bg-background/70 p-4 text-center">
-              <p className="text-2xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{knowledgeDocs.filter((d) => d.type === 'PFC').length}</p>
-              <p className="mt-1 text-xs text-muted-foreground">PFC</p>
-            </div>
-            <div className="rounded-xl bg-background/70 p-4 text-center">
-              <p className="text-2xl font-black text-[rgb(var(--intern-navy))] dark:text-foreground">{Object.keys(techCounts).length}</p>
-              <p className="mt-1 text-xs text-muted-foreground">Technologies</p>
-            </div>
           </div>
         </Card>
       </div>
