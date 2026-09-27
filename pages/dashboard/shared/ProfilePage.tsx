@@ -63,17 +63,37 @@ export function ProfilePage({ roleLabel, extraFields = [] }: { roleLabel: string
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
-      setSaveError('La photo de profil doit être au format JPG ou PNG.')
-      return
-    }
-    setSaveError('')
-    setNewPhoto(file)
-    setPhotoPreview(URL.createObjectURL(file))
+function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
+  const file = event.target.files?.[0]
+
+  if (!file) return
+
+  if (
+    file.type !== 'image/jpeg' &&
+    file.type !== 'image/png'
+  ) {
+    setSaveError(
+      'La photo de profil doit être au format JPG ou PNG.'
+    )
+    return
   }
+
+  if (file.size > 5 * 1024 * 1024) {
+    setSaveError(
+      "La photo de profil ne doit pas dépasser 5 Mo."
+    )
+    return
+  }
+
+  setSaveError('')
+  setSaveSuccess('')
+
+  setNewPhoto(file)
+
+  // Affichage immédiat de la nouvelle photo
+  const previewUrl = URL.createObjectURL(file)
+  setPhotoPreview(previewUrl)
+}
 
   async function handleSaveProfile() {
     setSaveError('')
@@ -92,9 +112,26 @@ export function ProfilePage({ roleLabel, extraFields = [] }: { roleLabel: string
 
       if (newPhoto) formData.append('profil_image', newPhoto)
 
-      const res = await updateMyProfile(formData)
-      setProfile((current) => (current ? { ...current, ...res.profile } : current))
-      setSaveSuccess('Profil modifié avec succès.')
+    const res = await updateMyProfile(formData)
+
+setProfile((current) =>
+  current
+    ? {
+        ...current,
+        ...res.profile,
+      }
+    : current
+)
+
+// On garde la nouvelle photo affichée
+if (newPhoto) {
+  const previewUrl = URL.createObjectURL(newPhoto)
+  setPhotoPreview(previewUrl)
+}
+
+setNewPhoto(null)
+
+setSaveSuccess('Profil modifié avec succès.')
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : 'Erreur lors de la modification du profil')
     } finally {
@@ -141,13 +178,23 @@ export function ProfilePage({ roleLabel, extraFields = [] }: { roleLabel: string
       <Card className="max-w-2xl rounded-3xl p-8 shadow-retool-sm">
         <div className="flex items-center gap-5">
           <div className="relative">
-            {photoPreview ? (
-              <img src={photoPreview} alt="Aperçu" className="h-20 w-20 rounded-full object-cover" />
-            ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[rgb(var(--intern-soft-blue))] text-2xl font-black text-[rgb(var(--intern-navy))]">
-                {localUser?.avatarInitials ?? '??'}
-              </div>
-            )}
+           {photoPreview ? (
+  <img
+    src={photoPreview}
+    alt="Photo de profil"
+    className="h-20 w-20 rounded-full object-cover"
+  />
+) : profile?.profil_image ? (
+  <img
+    src={profile.profil_image}
+    alt="Photo de profil"
+    className="h-20 w-20 rounded-full object-cover"
+  />
+) : (
+  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[rgb(var(--intern-soft-blue))] text-2xl font-black text-[rgb(var(--intern-navy))]">
+    {localUser?.avatarInitials ?? '??'}
+  </div>
+)}
             <label
               htmlFor="profile_photo_input"
               className="absolute -bottom-1 -right-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-[rgb(var(--intern-navy))] text-white"
