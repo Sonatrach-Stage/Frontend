@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ErrorBoundary } from '../shared/ErrorBoundary'
 import {
   Bot, Send, Sparkles, Search, FileText, Layers,
   TrendingUp, ExternalLink, Plus, Trash2, GitCompare,
@@ -56,10 +57,12 @@ export default function AssistantIAPage() {
         })}
       </div>
 
-      {tab === 'assistant' && <AssistantTab />}
-      {tab === 'documents' && <DocumentAnalysisTab />}
-      {tab === 'knowledge' && <KnowledgeTab />}
-      {tab === 'insights' && <InsightsTab />}
+      <ErrorBoundary resetKey={tab}>
+  {tab === 'assistant' && <AssistantTab />}
+  {tab === 'documents' && <DocumentAnalysisTab />}
+  {tab === 'knowledge' && <KnowledgeTab />}
+  {tab === 'insights' && <InsightsTab />}
+</ErrorBoundary>
     </>
   )
 }
@@ -282,6 +285,19 @@ function AssistantTab() {
 }
 
 // ============== ANALYSE DE DOCUMENTS (réel : résumé / similaires / comparer) ==============
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((v) => (typeof v === 'string' ? v : JSON.stringify(v)))
+  }
+  if (typeof value === 'string' && value.trim()) return [value]
+  return []
+}
+
+function toText(value: unknown): string {
+  if (typeof value === 'string') return value
+  if (value === null || value === undefined) return ''
+  return JSON.stringify(value)
+}
 
 function DocumentAnalysisTab() {
   const [documents, setDocuments] = useState<ApiDocument[]>([])
@@ -292,7 +308,7 @@ function DocumentAnalysisTab() {
   const [compareId, setCompareId] = useState<number | null>(null)
 
   const [summary, setSummary] = useState<{ summary: string; keyPoints: string[] } | null>(null)
-  const [similar, setSimilar] = useState<{ document_id: number; title: string; similarity_score: number }[] | null>(null)
+  const [similar, setSimilar] = useState<{ document_id: number; title: string; score: number }[] | null>(null)
   const [comparison, setComparison] = useState<{ comparison: string; similarities: string[]; differences: string[] } | null>(null)
 
   const [loadingAction, setLoadingAction] = useState<'summary' | 'similar' | 'compare' | null>(null)
@@ -300,13 +316,14 @@ function DocumentAnalysisTab() {
 
   useEffect(() => {
     getMyDocuments()
-      .then((res) => setDocuments(res.documents))
+      .then((res) => setDocuments(Array.isArray(res.documents) ? res.documents : []))
       .catch((err) => setError(err instanceof Error ? err.message : 'Erreur de chargement'))
       .finally(() => setLoading(false))
   }, [])
 
   function selectDocument(id: number) {
     setSelectedId(id)
+    setCompareId(null)
     setSummary(null)
     setSimilar(null)
     setComparison(null)
@@ -319,7 +336,7 @@ function DocumentAnalysisTab() {
     setActionError('')
     try {
       const res = await getDocumentSummary(selectedId)
-      setSummary({ summary: res.summary, keyPoints: res.keyPoints })
+      setSummary({ summary: toText(res.summary), keyPoints: toStringArray(res.keyPoints) })
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Erreur lors de la génération du résumé')
     } finally {
@@ -333,7 +350,14 @@ function DocumentAnalysisTab() {
     setActionError('')
     try {
       const res = await getSimilarDocuments(selectedId)
-      setSimilar(res.similarProjects)
+      const list = Array.isArray(res.similarProjects) ? res.similarProjects : []
+      setSimilar(
+        list.map((s) => ({
+          document_id: Number(s.document_id),
+          title: toText(s.title),
+          score: Number(s.similarity_score) || 0,
+        })),
+      )
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Erreur lors de la recherche de projets similaires')
     } finally {
@@ -347,7 +371,11 @@ function DocumentAnalysisTab() {
     setActionError('')
     try {
       const res = await compareDocuments(selectedId, compareId)
-      setComparison({ comparison: res.comparison, similarities: res.similarities, differences: res.differences })
+      setComparison({
+        comparison: toText(res.comparison),
+        similarities: toStringArray(res.similarities),
+        differences: toStringArray(res.differences),
+      })
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Erreur lors de la comparaison')
     } finally {
@@ -407,10 +435,10 @@ function DocumentAnalysisTab() {
               </div>
               {summary && (
                 <>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{summary.summary}</p>
+                  <p className="mt-3 whitespace-pre-line text-sm leading-6 text-muted-foreground">{summary.summary}</p>
                   {summary.keyPoints.length > 0 && (
                     <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
-                      {summary.keyPoints.map((p) => <li key={p}>• {p}</li>)}
+                      {summary.keyPoints.map((p, i) => <li key={`${i}-${p}`}>• {p}</li>)}
                     </ul>
                   )}
                 </>
@@ -429,10 +457,10 @@ function DocumentAnalysisTab() {
               </div>
               {similar && (
                 <div className="mt-3 space-y-2">
-                  {similar.map((s) => (
-                    <div key={s.document_id} className="flex items-center justify-between rounded-xl border bg-background/70 p-3 text-sm">
+                  {similar.map((s, i) => (
+                    <div key={`${s.document_id}-${i}`} className="flex items-center justify-between rounded-xl border bg-background/70 p-3 text-sm">
                       <span className="font-semibold text-foreground">{s.title}</span>
-                      <Badge variant="outline" className="rounded-full">{Math.round(s.similarity_score * 100)}%</Badge>
+                      <Badge variant="outline" className="rounded-full">{Math.round(s.score * 100)}%</Badge>
                     </div>
                   ))}
                   {similar.length === 0 && <p className="mt-2 text-sm text-muted-foreground">Aucun document similaire trouvé.</p>}
@@ -446,32 +474,34 @@ function DocumentAnalysisTab() {
                 <h3 className="font-black text-[rgb(var(--intern-navy))] dark:text-foreground">Comparer avec un autre document</h3>
               </div>
               <div className="mt-3 flex gap-2">
-                <Select value={compareId ? String(compareId) : ''} onValueChange={(v) => setCompareId(Number(v))}>
-                  <SelectTrigger className="h-10 rounded-xl"><SelectValue placeholder="Choisir un document" /></SelectTrigger>
-                  <SelectContent>
-                    {documents.filter((d) => d.id !== selectedId).map((d) => (
-                      <SelectItem key={d.id} value={String(d.id)}>{d.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={compareId ?? ''}
+                  onChange={(e) => setCompareId(e.target.value ? Number(e.target.value) : null)}
+                  className="h-10 flex-1 rounded-xl border bg-background px-3 text-sm"
+                >
+                  <option value="">Choisir un document</option>
+                  {documents.filter((d) => d.id !== selectedId).map((d) => (
+                    <option key={d.id} value={d.id}>{d.title}</option>
+                  ))}
+                </select>
                 <Button disabled={!compareId || loadingAction === 'compare'} className="rounded-xl bg-[rgb(var(--intern-navy))] text-white" onClick={handleCompare}>
                   {loadingAction === 'compare' ? '...' : 'Comparer'}
                 </Button>
               </div>
               {comparison && (
                 <div className="mt-4 space-y-3">
-                  <p className="text-sm leading-6 text-muted-foreground">{comparison.comparison}</p>
+                  <p className="whitespace-pre-line text-sm leading-6 text-muted-foreground">{comparison.comparison}</p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Similitudes</p>
                       <ul className="mt-1.5 space-y-1 text-sm text-muted-foreground">
-                        {comparison.similarities.map((s) => <li key={s}>• {s}</li>)}
+                        {comparison.similarities.map((s, i) => <li key={`${i}-${s}`}>• {s}</li>)}
                       </ul>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Différences</p>
                       <ul className="mt-1.5 space-y-1 text-sm text-muted-foreground">
-                        {comparison.differences.map((d) => <li key={d}>• {d}</li>)}
+                        {comparison.differences.map((d, i) => <li key={`${i}-${d}`}>• {d}</li>)}
                       </ul>
                     </div>
                   </div>
